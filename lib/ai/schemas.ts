@@ -59,6 +59,53 @@ export const petSchema = z
   })
   .strict();
 
+export const secretAnalysisOutputSchema = z
+  .object({
+    coreEmotion: shortText(24),
+    emotionalIntensity: z.number().int().min(1).max(5),
+    relationshipContext: shortText(80),
+    implicitNeed: shortText(120),
+    conflict: shortText(160),
+    metaphorSeeds: z.array(shortText(40)).min(3).max(8),
+    privacyRiskNotes: z.array(shortText(120)).max(5)
+  })
+  .strict();
+
+export const roomNarrativeOutputSchema = z
+  .object({
+    roomTitle: shortText(40),
+    publicTitle: shortText(32),
+    emotionType: shortText(24),
+    hiddenMeaning: shortText(500),
+    visualTheme: z.enum([
+      "old_paper_dollhouse",
+      "warm_notebook_cabin",
+      "rainy_desk_miniature",
+      "moonlit_paper_room",
+      "pressed_flower_attic"
+    ]),
+    objects: z.array(roomObjectSchema).length(5),
+    choices: z.array(roomChoiceSchema).length(4),
+    endingLine: shortText(120),
+    shareText: shortText(120),
+    pet: petSchema
+  })
+  .strict();
+
+export const clueImagePromptObjectSchema = z
+  .object({
+    objectId: llmIdSchema,
+    prompt: shortText(1200),
+    negativePrompt: shortText(400)
+  })
+  .strict();
+
+export const clueImagePromptOutputSchema = z
+  .object({
+    objects: z.array(clueImagePromptObjectSchema).length(5)
+  })
+  .strict();
+
 export const generateRoomFromSecretOutputSchema = z
   .object({
     roomTitle: shortText(40),
@@ -184,6 +231,11 @@ export type GenerateRoomFromSecretInput = z.infer<
 >;
 export type GenerateRoomFromSecretOutput = z.infer<
   typeof generateRoomFromSecretOutputSchema
+>;
+export type SecretAnalysisOutput = z.infer<typeof secretAnalysisOutputSchema>;
+export type RoomNarrativeOutput = z.infer<typeof roomNarrativeOutputSchema>;
+export type ClueImagePromptOutput = z.infer<
+  typeof clueImagePromptOutputSchema
 >;
 export type JudgeGuessInput = z.infer<typeof judgeGuessInputSchema>;
 export type JudgeGuessOutput = z.infer<typeof judgeGuessOutputSchema>;
@@ -330,6 +382,63 @@ export const generateRoomJsonSchema = {
         name: { type: "string", maxLength: 16 },
         personality: { type: "string", maxLength: 80 },
         safetyBehavior: { type: "string", maxLength: 140 }
+      }
+    }
+  }
+} as const;
+
+export const secretAnalysisJsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "coreEmotion",
+    "emotionalIntensity",
+    "relationshipContext",
+    "implicitNeed",
+    "conflict",
+    "metaphorSeeds",
+    "privacyRiskNotes"
+  ],
+  properties: {
+    coreEmotion: { type: "string", maxLength: 24 },
+    emotionalIntensity: { type: "integer", minimum: 1, maximum: 5 },
+    relationshipContext: { type: "string", maxLength: 80 },
+    implicitNeed: { type: "string", maxLength: 120 },
+    conflict: { type: "string", maxLength: 160 },
+    metaphorSeeds: {
+      type: "array",
+      minItems: 3,
+      maxItems: 8,
+      items: { type: "string", maxLength: 40 }
+    },
+    privacyRiskNotes: {
+      type: "array",
+      maxItems: 5,
+      items: { type: "string", maxLength: 120 }
+    }
+  }
+} as const;
+
+export const roomNarrativeJsonSchema = generateRoomJsonSchema;
+
+export const clueImagePromptJsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["objects"],
+  properties: {
+    objects: {
+      type: "array",
+      minItems: 5,
+      maxItems: 5,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["objectId", "prompt", "negativePrompt"],
+        properties: {
+          objectId: { type: "string", pattern: "^[a-z][a-z0-9_-]*$" },
+          prompt: { type: "string", maxLength: 1200 },
+          negativePrompt: { type: "string", maxLength: 400 }
+        }
       }
     }
   }

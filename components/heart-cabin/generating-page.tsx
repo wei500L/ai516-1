@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ChevronRight, Heart, House, KeyRound } from "lucide-react";
 import { motion } from "motion/react";
@@ -14,7 +15,54 @@ import { useCreateRoomDraft } from "@/lib/use-create-room-draft";
 
 export function GeneratingPage() {
   const router = useRouter();
-  const draft = useCreateRoomDraft((state) => state.draft);
+  const { draft, resetDraft } = useCreateRoomDraft();
+  const [error, setError] = useState<string | null>(null);
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+
+    const sentence = draft.sentence.trim();
+
+    if (!sentence) {
+      router.replace("/create");
+      return;
+    }
+
+    async function generateRoom() {
+      const response = await fetch("/api/rooms/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          sentence,
+          emotionTags: draft.moodTags.length > 0 ? draft.moodTags : ["秘密"],
+          imageAssetId: null,
+          visibility: "unlisted"
+        })
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(
+          payload?.error?.message ?? "生成失败，请稍后再试。"
+        );
+      }
+
+      const payload = (await response.json()) as {
+        redirectUrl?: string;
+      };
+
+      resetDraft();
+      router.replace(payload.redirectUrl ?? "/");
+    }
+
+    generateRoom().catch((reason) => {
+      setError(reason instanceof Error ? reason.message : "生成失败，请稍后再试。");
+    });
+  }, [draft.moodTags, draft.sentence, resetDraft, router]);
 
   return (
     <AppShell>
@@ -69,11 +117,11 @@ export function GeneratingPage() {
         </section>
 
         <TornPaperCard tone="cream" className="mt-8 text-center font-serif text-xl" tape="corner">
-          别急，秘密正在被轻轻收好。
+          {error ?? "别急，秘密正在被轻轻收好。"}
         </TornPaperCard>
 
         <PaperButton className="mb-12 mt-8" withTape onClick={() => router.push("/create")}>
-          回到信纸
+          {error ? "回到信纸重试" : "回到信纸"}
           <ChevronRight className="h-7 w-7" />
         </PaperButton>
       </PaperPage>
