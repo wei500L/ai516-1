@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronRight, KeyRound, Lock } from "lucide-react";
-import { HanddrawnIcons } from "@/components/handbook/handdrawn-assets";
+import { ChevronRight, Flower2, Heart, KeyRound, Lock, Paperclip } from "lucide-react";
 import { EnvelopeCard } from "@/components/handbook/envelope-card";
 import { PaperButton } from "@/components/handbook/paper-button";
 import { PolaroidCard } from "@/components/handbook/polaroid-card";
@@ -26,14 +25,14 @@ export function HomePage() {
           <p className="soft-title text-2xl">《心事小屋》</p>
           <div className="mx-auto mt-3 flex w-32 items-center gap-2 text-coffee/32">
             <span className="h-px flex-1 bg-coffee/24" />
-            <HanddrawnIcons.Flower className="h-4 w-4" />
+            <Flower2 className="h-4 w-4" />
             <span className="h-px flex-1 bg-coffee/24" />
           </div>
           <h1 className="soft-title mt-10 text-[44px] leading-[1.18]">
             把一句话，
             <br />
             藏进一间小屋
-            <HanddrawnIcons.Heart className="mb-1 ml-2 inline h-8 w-8 text-warm-orange" />
+            <Heart className="mb-1 ml-2 inline h-8 w-8 text-warm-orange" strokeWidth={1.8} />
           </h1>
           <p className="mx-auto mt-8 max-w-[290px] font-serif text-xl leading-9 text-coffee/78">
             写下一句不太好意思直接说的话，让 AI 把它变成一间可以被朋友破解的秘密小屋。
@@ -54,7 +53,7 @@ export function HomePage() {
           <MiniCabin className="absolute bottom-7 left-1/2 -translate-x-1/2 scale-[1.18]" />
           <EnvelopeCard className="absolute bottom-0 left-4 w-48 -rotate-3" />
           <KeyRound className="absolute bottom-9 right-20 h-12 w-12 rotate-[-18deg] text-coffee/65" strokeWidth={1.5} />
-          <HanddrawnIcons.Paperclip className="absolute bottom-1 right-11 h-9 w-9 rotate-12 text-coffee/40" />
+          <Paperclip className="absolute bottom-1 right-11 h-9 w-9 rotate-12 text-coffee/40" strokeWidth={1.5} />
           <TornPaperCard className="absolute bottom-0 right-0 w-32 p-3 font-serif text-base leading-7" tape="top">
             <StickerTag tone="sage" className="mb-1 text-xs">
               小提示
@@ -66,13 +65,13 @@ export function HomePage() {
         <div className="mb-12 mt-4 space-y-4">
           <PaperButton
             withTape
-            icon={<HanddrawnIcons.Flower className="h-7 w-7" />}
+            icon={<Flower2 className="h-7 w-7" />}
             onClick={() => router.push("/create")}
           >
             把心事藏起来
             <ChevronRight className="h-7 w-7" />
           </PaperButton>
-          <PaperButton variant="paper" icon={<HanddrawnIcons.Paperclip className="h-8 w-8" />}>
+          <PaperButton variant="paper" icon={<Paperclip className="h-8 w-8" />}>
             看看别人怎么藏
             <ChevronRight className="h-7 w-7" />
           </PaperButton>

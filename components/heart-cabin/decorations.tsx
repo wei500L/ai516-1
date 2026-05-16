@@ -1,5 +1,4 @@
-import { Moon, Sparkles, Star } from "lucide-react";
-import { HanddrawnIcons } from "@/components/handbook/handdrawn-assets";
+import { Flower2, Heart, Moon, Sparkles, Star } from "lucide-react";
 import { StickerTag } from "@/components/handbook/sticker-tag";
 import { cn } from "@/lib/utils";
 
@@ -7,7 +6,7 @@ export function Stamp({ className }: { className?: string }) {
   return (
     <div className={cn("text-coffee/25", className)}>
       <div className="torn-edge paper-grain ml-auto flex h-16 w-12 items-center justify-center border border-coffee/12 bg-cream">
-        <HanddrawnIcons.Flower className="h-8 w-8 text-sage/70" />
+        <Flower2 className="h-8 w-8 text-sage/70" strokeWidth={1.4} />
       </div>
       <div className="-mt-3 h-12 w-20 rounded-full border-2 border-coffee/15" />
     </div>
@@ -51,7 +50,7 @@ export function MiniDoor({ className }: { className?: string }) {
       <div className="absolute bottom-0 left-1/2 h-64 w-40 -translate-x-1/2 rounded-t-full bg-[#9b6a43] shadow-paper">
         <div className="absolute inset-3 rounded-t-full border border-coffee/25" />
         <div className="absolute inset-x-4 top-0 h-full bg-[repeating-linear-gradient(90deg,transparent_0_20px,rgba(55,32,16,0.18)_20px_22px)]" />
-        <HanddrawnIcons.Heart className="absolute left-1/2 top-24 h-7 w-7 -translate-x-1/2 text-coffee/65" />
+        <Heart className="absolute left-1/2 top-24 h-7 w-7 -translate-x-1/2 text-coffee/65" />
         <span className="absolute right-7 top-36 h-3 w-3 rounded-full bg-parchment shadow-sticker" />
       </div>
       <div className="absolute bottom-0 left-0 h-12 w-16 bg-cream/40" />

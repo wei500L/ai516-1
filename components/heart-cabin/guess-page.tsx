@@ -55,7 +55,7 @@ export function GuessPage({ roomId }: GuessPageProps) {
           <HanddrawnIconButton
             icon={<ArrowLeft className="h-7 w-7" />}
             label="返回小屋"
-            onClick={() => router.push(`/play/${roomId}`)}
+            onClick={() => router.push(`/rooms/${roomId}/play`)}
             className="absolute left-0 top-0"
           />
           <h1 className="soft-title pt-3 text-[34px] leading-tight">交出你的猜想</h1>

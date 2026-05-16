@@ -1,8 +1,9 @@
+"use client";
+
 import { motion } from "motion/react";
 import type { HTMLMotionProps } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Tape } from "@/components/handbook/tape";
-import { HanddrawnButtonShape } from "@/components/handbook/handdrawn-assets";
 
 type PaperButtonProps = Omit<HTMLMotionProps<"button">, "children"> & {
   children?: React.ReactNode;
@@ -11,18 +12,11 @@ type PaperButtonProps = Omit<HTMLMotionProps<"button">, "children"> & {
   withTape?: boolean;
 };
 
-const variantColors = {
-  sage: "var(--sage)",
-  paper: "var(--cream)",
-  parchment: "var(--parchment)",
-  brick: "var(--brick-red)"
-};
-
 const variantClasses = {
-  sage: "text-cream",
-  paper: "text-coffee",
-  parchment: "text-coffee",
-  brick: "text-cream"
+  sage: "bg-sage text-cream",
+  paper: "bg-cream text-coffee",
+  parchment: "bg-parchment text-coffee",
+  brick: "bg-brick-red text-cream"
 };
 
 export function PaperButton({
@@ -40,19 +34,16 @@ export function PaperButton({
       transition={{ type: "spring", stiffness: 420, damping: 24 }}
       type={type}
       className={cn(
-        "relative inline-flex min-h-14 w-full items-center justify-center gap-3 overflow-visible px-4 py-2 text-center soft-title text-[28px] leading-none outline-none drop-shadow-sticker",
+        "torn-edge paper-grain relative inline-flex min-h-14 w-full items-center justify-center gap-3 overflow-visible px-7 py-4 text-center soft-title text-[28px] leading-none shadow-sticker outline-none",
         "focus-visible:ring-2 focus-visible:ring-warm-orange/50 disabled:cursor-not-allowed disabled:opacity-60",
         variantClasses[variant],
         className
       )}
       {...props}
     >
-      <HanddrawnButtonShape color={variantColors[variant]} className="absolute inset-0 w-full h-full" />
-      <div className="relative z-10 flex items-center justify-center gap-3">
-        {withTape ? <Tape className="-right-6 -top-5 h-6 w-16 rotate-[16deg]" /> : null}
-        {icon}
-        <span>{children}</span>
-      </div>
+      {withTape ? <Tape className="-right-1 -top-3 h-6 w-16 rotate-[16deg]" /> : null}
+      {icon}
+      <span>{children}</span>
     </motion.button>
   );
 }

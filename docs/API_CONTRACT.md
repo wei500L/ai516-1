@@ -45,7 +45,15 @@
 
 用途：用户 A 输入一句心事，可选关联已上传图片线索，生成房间。
 
-后续该接口内部会调用 LLM；当前实现保留 `generateRoomService` mock。
+当服务端存在完整 OpenAI 兼容配置时，该接口会执行分阶段生成：
+
+1. 语义分析
+2. 房间叙事结构与线索设计
+3. 线索物件图像提示词
+4. 并发生成线索物件元素图
+5. 组装 `room_json`
+
+无完整 AI 配置时保留 `generateRoomService` mock，便于本地开发。API key 只允许存在服务端配置中，不能由前端传入。
 
 Request:
 
@@ -77,16 +85,84 @@ Response `201`:
 Response `200`:
 
 ```ts
+type StageAsset = {
+  id: string;
+  kind: string;
+  assetUrl?: string;
+  alt?: string;
+  position: {
+    x: number;
+    y: number;
+    z?: number;
+    layer?: number;
+  };
+  anchor?: { x: number; y: number } | "bottom-center" | "center" | "top-left";
+  width: number;
+  height: number;
+  scale?: number;
+  opacity?: number;
+  layer?: number;
+  style?: string;
+};
+
 {
   roomId: string;
   publicTitle: string;
   visualTheme: string;
+  renderTarget?: "2.5d_miniature_cabin";
+  camera?: "top_down_2_5d";
+  stage?: {
+    backgroundStyle: string;
+    roomShellType: string;
+    lighting: string;
+    floorStyle: string;
+    backgroundAsset?: StageAsset | null;
+    foreground?: StageAsset[];
+  };
   objects: Array<{
     id: string;
+    name?: string;
+    clue?: string;
+    keyword?: string;
     title: string;
     description: string;
     discovered: boolean;
     imageUrl?: string | null;
+    assetUrl?: string | null;
+    position?: {
+      x: number;
+      y: number;
+      z?: number;
+      layer?: number;
+    };
+    anchor?: { x: 0.5; y: 1 } | "bottom-center" | "center" | "top-left";
+    scale?: number;
+    shadow?: {
+      enabled: boolean;
+      width: number;
+      height: number;
+      opacity: number;
+      blur: number;
+      offsetY: number;
+    };
+    render?: {
+      assetUrl: string;
+      width: number;
+      height: number;
+      style: string;
+      interactive: true;
+      anchor?: { x: 0.5; y: 1 } | "bottom-center" | "center" | "top-left";
+      scale?: number;
+      shadow?: {
+        enabled: boolean;
+        width: number;
+        height: number;
+        opacity: number;
+        blur: number;
+        offsetY: number;
+      };
+    };
+    interactionType?: "tap" | "tap_note" | "tap_reveal";
   }>;
   imageClue: {
     assetId: string;
@@ -99,6 +175,25 @@ Response `200`:
     avatarUrl: string | null;
     mood: string;
     maxHintLevel: 0 | 1 | 2 | 3;
+    type?: "cat" | "dog";
+    position?: {
+      x: number;
+      y: number;
+      z?: number;
+      layer?: number;
+    };
+    anchor?: { x: 0.5; y: 1 } | "bottom-center";
+    scale?: number;
+    assetUrl?: string | null;
+    shadow?: {
+      enabled: boolean;
+      width: number;
+      height: number;
+      opacity: number;
+      blur: number;
+      offsetY: number;
+    };
+    chatEnabled?: true;
   };
   choices?: Array<{
     index: number;

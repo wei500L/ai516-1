@@ -1,7 +1,8 @@
+"use client";
+
 import { motion } from "motion/react";
 import type { HTMLMotionProps } from "motion/react";
 import { cn } from "@/lib/utils";
-import { HanddrawnCircle } from "@/components/handbook/handdrawn-assets";
 
 type HanddrawnIconButtonProps = Omit<HTMLMotionProps<"button">, "children"> & {
   icon: React.ReactNode;
@@ -24,13 +25,13 @@ export function HanddrawnIconButton({
       aria-label={label}
       title={label}
       className={cn(
-        "paper-grain relative inline-flex h-12 w-12 items-center justify-center text-coffee outline-none focus-visible:ring-2 focus-visible:ring-warm-orange/50",
+        "paper-grain inline-flex h-12 w-12 items-center justify-center text-coffee shadow-sticker outline-none focus-visible:ring-2 focus-visible:ring-warm-orange/50",
+        variant === "paper" ? "torn-edge bg-parchment" : "rounded-full border border-coffee/12 bg-cream",
         className
       )}
       {...props}
     >
-      <HanddrawnCircle color={variant === "paper" ? "var(--parchment)" : "var(--cream)"} />
-      <div className="relative z-10">{icon}</div>
+      {icon}
     </motion.button>
   );
 }

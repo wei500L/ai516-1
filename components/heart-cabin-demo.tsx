@@ -4,21 +4,18 @@ import {
   ArrowLeft,
   ChevronRight,
   CircleEllipsis,
+  Flower2,
+  Heart,
   House,
   KeyRound,
   Lock,
   Moon,
+  Paperclip,
   Send,
   Sparkles,
   Star,
   X
 } from "lucide-react";
-import { 
-  HanddrawnIcons, 
-  HanddrawnCabin, 
-  HanddrawnBrassKey, 
-  HanddrawnVintageClock 
-} from "@/components/handbook/handdrawn-assets";
 import { AnimatePresence, motion } from "motion/react";
 import { AppShell } from "@/components/layout/app-shell";
 import { PaperPage } from "@/components/layout/paper-page";
@@ -113,7 +110,7 @@ function PageHeader({
       <h1 className="soft-title pt-3 text-[34px] leading-tight">{title}</h1>
       <div className="mx-auto mt-2 flex w-36 items-center justify-center gap-2 text-coffee/36">
         <span className="h-px flex-1 bg-coffee/22" />
-        <HanddrawnIcons.Flower className="h-6 w-6" />
+        <Flower2 className="h-5 w-5" strokeWidth={1.4} />
         <span className="h-px flex-1 bg-coffee/22" />
       </div>
       {subtitle ? <p className="mt-4 font-serif text-lg text-coffee/72">{subtitle}</p> : null}
@@ -129,20 +126,18 @@ function HomeScreen() {
     <PaperPage className="pt-20" innerClassName="flex min-h-[calc(100dvh-7rem)] flex-col">
       <Tape className="left-16 top-12" />
       <Stamp className="absolute right-8 top-16" />
-      <HanddrawnVintageClock className="absolute right-4 bottom-24 w-16 h-20 opacity-80" />
-      <HanddrawnBrassKey className="absolute left-10 bottom-4 w-24 h-10 rotate-[15deg] opacity-70" />
       <section className="text-center">
         <p className="soft-title text-2xl">《心事小屋》</p>
         <div className="mx-auto mt-3 flex w-32 items-center gap-2 text-coffee/32">
           <span className="h-px flex-1 bg-coffee/24" />
-          <HanddrawnIcons.Flower className="h-5 w-5" />
+          <Flower2 className="h-4 w-4" />
           <span className="h-px flex-1 bg-coffee/24" />
         </div>
         <h1 className="soft-title mt-10 text-[44px] leading-[1.18]">
           把一句话，
           <br />
           藏进一间小屋
-          <HanddrawnIcons.Heart className="mb-1 ml-2 inline h-9 w-9 text-warm-orange" />
+          <Heart className="mb-1 ml-2 inline h-8 w-8 text-warm-orange" strokeWidth={1.8} />
         </h1>
         <p className="mx-auto mt-8 max-w-[290px] font-serif text-xl leading-9 text-coffee/78">
           写下一句不太好意思直接说的话，让 AI 把它变成一间可以被朋友破解的秘密小屋。
@@ -165,11 +160,11 @@ function HomeScreen() {
       </section>
 
       <div className="mb-12 mt-4 space-y-4">
-        <PaperButton withTape icon={<HanddrawnIcons.Flower className="h-8 w-8" />} onClick={() => setStep("write")}>
+        <PaperButton withTape icon={<Flower2 className="h-7 w-7" />} onClick={() => setStep("write")}>
           把心事藏起来
           <ChevronRight className="h-7 w-7" />
         </PaperButton>
-        <PaperButton variant="paper" icon={<HanddrawnIcons.Paperclip className="h-9 w-9" />} onClick={() => setStep("play")}>
+        <PaperButton variant="paper" icon={<Paperclip className="h-8 w-8" />} onClick={() => setStep("play")}>
           看看别人怎么藏
           <ChevronRight className="h-7 w-7" />
         </PaperButton>
@@ -190,7 +185,7 @@ function WriteScreen() {
       <Tape className="left-16 top-11" />
       <PageHeader title="写下心事" backTo="home" />
       <div className="relative">
-        <HanddrawnIcons.Paperclip className="absolute -left-3 -top-6 z-20 h-14 w-14 rotate-12 text-coffee/42" />
+        <Paperclip className="absolute -left-1 -top-4 z-20 h-12 w-12 rotate-12 text-coffee/42" strokeWidth={1.5} />
         <Tape className="right-2 top-3 rotate-[13deg]" />
         <NotebookTextarea
           defaultValue=""
@@ -202,7 +197,7 @@ function WriteScreen() {
       <p className="mt-5 text-center font-serif text-lg text-coffee/70">小提示：8-40 字会更适合藏进小屋</p>
 
       <section className="mt-8">
-        <StickerTag icon={<HanddrawnIcons.Flower className="h-6 w-6" />} className="mb-5 text-lg soft-title">
+        <StickerTag icon={<Flower2 className="h-5 w-5" />} className="mb-5 text-lg soft-title">
           选择心事风格（可多选）
         </StickerTag>
         <div className="grid grid-cols-3 gap-4">
@@ -267,7 +262,7 @@ function GeneratingScreen() {
 
       <div className="mt-2 grid grid-cols-3 gap-3">
         {[
-          ["1", "读懂这句话的情绪", <HanddrawnIcons.Heart key="h" className="h-10 w-10 text-brick-red" />],
+          ["1", "读懂这句话的情绪", <Heart key="h" className="h-10 w-10 text-brick-red" />],
           ["2", "变成 5 个线索物件", <KeyRound key="k" className="h-10 w-10 text-coffee/70" />],
           ["3", "搭好一间秘密小屋", <House key="r" className="h-10 w-10 text-sage" />]
         ].map(([index, label, icon]) => (
@@ -312,7 +307,7 @@ function PlayScreen() {
       <header className="text-center">
         <h1 className="soft-title text-[38px] leading-tight">
           {demoRoom.publicTitle}
-          <HanddrawnIcons.Heart className="mb-1 ml-1 inline h-7 w-7 text-warm-orange" />
+          <Heart className="mb-1 ml-1 inline h-6 w-6 text-warm-orange" />
         </h1>
         <TornPaperCard tone="parchment" className="mx-auto mt-7 w-[82%] py-3 font-serif text-lg" tape="top">
           这里藏着一句话，找到 <strong>5</strong> 个线索来猜猜看。
@@ -347,7 +342,7 @@ function PlayScreen() {
 
       <PaperButton className="mb-12 mt-7" withTape onClick={() => setStep("result")}>
         我好像猜到了
-        <HanddrawnIcons.Heart className="h-7 w-7 text-warm-orange" />
+        <Heart className="h-7 w-7 text-warm-orange" />
       </PaperButton>
     </PaperPage>
   );
@@ -391,7 +386,7 @@ function ResultScreen() {
           还差一点：
           <br />
           害羞和自尊
-          <HanddrawnIcons.Heart className="ml-1 inline h-6 w-6 text-warm-orange" />
+          <Heart className="ml-1 inline h-5 w-5 text-warm-orange" />
         </TornPaperCard>
         <TornPaperCard tone="cream" className="font-serif text-lg leading-8">
           <StickerTag tone="sage" className="mb-2">原句半揭晓</StickerTag>
@@ -433,16 +428,30 @@ function ResultTopBar() {
 function Stamp({ className }: { className?: string }) {
   return (
     <div className={cn("text-coffee/25", className)}>
-      <HanddrawnTornPaper color="var(--cream)" className="ml-auto h-16 w-12 p-0 flex items-center justify-center">
-        <HanddrawnIcons.Flower className="h-8 w-8 text-sage/70" />
-      </HanddrawnTornPaper>
-      <div className="-mt-3 h-12 w-20 rounded-full border-2 border-coffee/15 rotate-[-5deg]" />
+      <div className="torn-edge paper-grain ml-auto flex h-16 w-12 items-center justify-center border border-coffee/12 bg-cream">
+        <Flower2 className="h-8 w-8 text-sage/70" strokeWidth={1.4} />
+      </div>
+      <div className="-mt-3 h-12 w-20 rounded-full border-2 border-coffee/15" />
     </div>
   );
 }
 
 function MiniCabin({ className }: { className?: string }) {
-  return <HanddrawnCabin className={cn("scale-[0.8] origin-bottom", className)} />;
+  return (
+    <div className={cn("relative h-44 w-56", className)}>
+      <div className="absolute bottom-0 left-6 h-28 w-44 rounded-[4px] bg-[#c9a079] shadow-paper">
+        <div className="absolute -top-14 left-1/2 h-28 w-36 -translate-x-1/2 rotate-45 bg-[#8e4b2d] shadow-sticker" />
+        <div className="absolute inset-2 border border-coffee/12" />
+        <div className="absolute bottom-0 left-1/2 h-20 w-12 -translate-x-1/2 rounded-t-full bg-warm-orange shadow-[0_0_18px_rgba(255,188,84,0.85)]" />
+        <div className="absolute bottom-10 left-5 h-10 w-9 bg-cream/70 shadow-insetPaper" />
+        <div className="absolute bottom-10 right-5 h-10 w-9 bg-[#ffd477]/80 shadow-[0_0_14px_rgba(255,196,88,0.72)]" />
+        <StickerTag className="absolute left-1/2 top-9 -translate-x-1/2 text-xs">心事小屋</StickerTag>
+      </div>
+      <div className="absolute bottom-1 left-0 h-14 w-8 rounded-t-full border-4 border-cream" />
+      <div className="absolute bottom-1 right-0 h-14 w-8 rounded-t-full border-4 border-cream" />
+      <div className="absolute bottom-8 right-7 h-9 w-8 rounded-t-full bg-brick-red" />
+    </div>
+  );
 }
 
 function MiniWindow() {
@@ -464,7 +473,7 @@ function MiniDoor({ className }: { className?: string }) {
       <div className="absolute bottom-0 left-1/2 h-64 w-40 -translate-x-1/2 rounded-t-full bg-[#9b6a43] shadow-paper">
         <div className="absolute inset-3 rounded-t-full border border-coffee/25" />
         <div className="absolute inset-x-4 top-0 h-full bg-[repeating-linear-gradient(90deg,transparent_0_20px,rgba(55,32,16,0.18)_20px_22px)]" />
-        <HanddrawnIcons.Heart className="absolute left-1/2 top-24 h-7 w-7 -translate-x-1/2 text-coffee/65" />
+        <Heart className="absolute left-1/2 top-24 h-7 w-7 -translate-x-1/2 text-coffee/65" />
         <span className="absolute right-7 top-36 h-3 w-3 rounded-full bg-parchment shadow-sticker" />
       </div>
       <div className="absolute bottom-0 left-0 h-12 w-16 bg-cream/40" />

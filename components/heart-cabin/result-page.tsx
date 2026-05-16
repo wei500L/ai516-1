@@ -143,7 +143,11 @@ export function ResultPage({ guessId }: ResultPageProps) {
         </TornPaperCard>
 
         <div className="mb-12 mt-7 space-y-4">
-          <PaperButton withTape icon={<Send className="h-7 w-7" />} onClick={() => router.push(`/play/${result.roomId}`)}>
+          <PaperButton
+            withTape
+            icon={<Send className="h-7 w-7" />}
+            onClick={() => router.push(`/rooms/${result.roomId}/play`)}
+          >
             发给朋友继续猜
           </PaperButton>
           <PaperButton variant="paper" onClick={() => router.push("/create")}>

@@ -1,4 +1,4 @@
-import { HanddrawnIcons } from "@/components/handbook/handdrawn-assets";
+import { Flower2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ProgressStickersProps = {
@@ -16,11 +16,11 @@ export function ProgressStickers({ total, current, className }: ProgressStickers
           <span
             key={index}
             className={cn(
-              "paper-grain relative flex h-12 w-12 items-center justify-center rounded-full bg-cream text-sage shadow-sticker",
+              "torn-edge paper-grain relative flex h-12 w-12 items-center justify-center rounded-full bg-cream text-sage shadow-sticker",
               active && "text-warm-orange shadow-[0_0_14px_rgba(236,169,77,0.65),0_7px_13px_rgba(75,45,21,0.18)]"
             )}
           >
-            <HanddrawnIcons.Flower className="h-7 w-7" />
+            <Flower2 className="h-7 w-7" strokeWidth={1.4} />
           </span>
         );
       })}

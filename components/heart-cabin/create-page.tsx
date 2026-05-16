@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronRight, House } from "lucide-react";
-import { HanddrawnIcons } from "@/components/handbook/handdrawn-assets";
+import { ArrowLeft, ChevronRight, Flower2, Heart, House, Paperclip } from "lucide-react";
 import { HanddrawnIconButton } from "@/components/handbook/handdrawn-icon-button";
 import { PaperButton } from "@/components/handbook/paper-button";
 import { StickerTag } from "@/components/handbook/sticker-tag";
@@ -53,15 +52,16 @@ export function CreatePage() {
           <h1 className="soft-title pt-3 text-[34px] leading-tight">写下心事</h1>
           <div className="mx-auto mt-2 flex w-36 items-center justify-center gap-2 text-coffee/36">
             <span className="h-px flex-1 bg-coffee/22" />
-            <HanddrawnIcons.Flower className="h-5 w-5" />
+            <Flower2 className="h-5 w-5" strokeWidth={1.4} />
             <span className="h-px flex-1 bg-coffee/22" />
           </div>
           <Stamp className="absolute right-2 top-0" />
         </header>
 
         <div className="relative">
-          <HanddrawnIcons.Paperclip
+          <Paperclip
             className="absolute -left-1 -top-4 z-20 h-12 w-12 rotate-12 text-coffee/42"
+            strokeWidth={1.5}
           />
           <Tape className="right-2 top-3 rotate-[13deg]" />
           <NotebookTextarea
@@ -82,7 +82,7 @@ export function CreatePage() {
         </p>
 
         <section className="mt-8">
-          <StickerTag icon={<HanddrawnIcons.Flower className="h-5 w-5" />} className="mb-5 text-lg soft-title">
+          <StickerTag icon={<Flower2 className="h-5 w-5" />} className="mb-5 text-lg soft-title">
             选择心事风格（可多选）
           </StickerTag>
           <div className="grid grid-cols-3 gap-4">
@@ -104,7 +104,7 @@ export function CreatePage() {
                   )}
                 >
                   {label}
-                  {selected ? <HanddrawnIcons.Heart className="ml-1 inline h-5 w-5 text-warm-orange" /> : null}
+                  {selected ? <Heart className="ml-1 inline h-5 w-5 text-warm-orange" /> : null}
                 </button>
               );
             })}
