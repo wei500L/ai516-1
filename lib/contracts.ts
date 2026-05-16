@@ -34,6 +34,47 @@ export const createRoomDraftSchema = z.object({
 export type CreateRoomDraft = z.infer<typeof createRoomDraftSchema>;
 export type MoodTag = CreateRoomDraft["moodTags"][number];
 
+export const roomObjectPositionSchema = z.object({
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100)
+});
+
+export const roomObjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  clue: z.string(),
+  keyword: z.string(),
+  position: roomObjectPositionSchema,
+  assetKey: z.enum(["envelope", "clock", "plant", "window", "chair-note"])
+});
+
+export const imageClueSchema = z.object({
+  url: z.string(),
+  caption: z.string(),
+  safeDescription: z.string()
+});
+
+export const petCompanionSchema = z.object({
+  type: z.enum(["cat", "dog"]),
+  name: z.string(),
+  mood: z.string()
+});
+
+export const publicRoomPlaySchema = z.object({
+  roomId: z.string(),
+  roomTitle: z.string(),
+  publicTitle: z.string(),
+  visualTheme: z.string(),
+  objects: z.array(roomObjectSchema).length(5),
+  imageClue: imageClueSchema.nullable(),
+  pet: petCompanionSchema,
+  progress: z.number().min(0).max(5),
+  discoveredObjectIds: z.array(z.string())
+});
+
+export type RoomObject = z.infer<typeof roomObjectSchema>;
+export type PublicRoomPlayData = z.infer<typeof publicRoomPlaySchema>;
+
 export const demoRoom: RoomPreview = roomPreviewSchema.parse({
   roomId: "demo-paper-cabin",
   publicTitle: "朋友的心事小屋",

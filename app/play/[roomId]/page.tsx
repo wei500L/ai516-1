@@ -1,5 +1,13 @@
-import { MockPlayPage } from "@/components/heart-cabin/mock-play-page";
+import { RoomPlayPage } from "@/components/heart-cabin/room-play-page";
 
-export default function Page() {
-  return <MockPlayPage />;
+type PageProps = {
+  params: Promise<{
+    roomId: string;
+  }>;
+};
+
+export default async function Page({ params }: PageProps) {
+  const { roomId } = await params;
+
+  return <RoomPlayPage roomId={roomId} />;
 }
