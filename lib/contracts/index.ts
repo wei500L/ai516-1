@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export * from "./api";
+
 export const clueSchema = z.object({
   id: z.string(),
   title: z.string(),
