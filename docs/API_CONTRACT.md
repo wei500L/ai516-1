@@ -369,9 +369,9 @@ Request:
 ```ts
 {
   fileName: string;
-  contentType: "image/png" | "image/jpeg" | "image/jpg" | "image/webp" | "image/gif";
+  contentType: "image/png" | "image/jpeg" | "image/jpg" | "image/webp";
   fileSize: number;
-  roomId: string | null;
+  roomId: string;
   role: "clue_image";
 }
 ```
@@ -383,6 +383,7 @@ Response `201`:
   assetId: string;
   uploadUrl: string;
   storagePath: string;
+  previewUrl: string;
   publicUrl: string | null;
   expiresAt: string;
 }
@@ -390,6 +391,6 @@ Response `201`:
 
 约束：
 
-- 最大文件大小为 10 MB。
+- 最大文件大小为 5 MB。
 - bucket 应为私有。
-- `publicUrl` 默认为 `null`，play 页面应使用经过授权的 safe image data。
+- `publicUrl` 默认为 `null`，`previewUrl` 是短期 signed URL，play 页面应使用经过授权的 safe image data。

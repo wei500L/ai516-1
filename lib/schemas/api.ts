@@ -224,12 +224,14 @@ export const petChatResponseSchema = z.object({
 export const createDiaryAccessRequestRequestSchema = z.object({
   roomId: idSchema,
   guessId: idSchema,
+  diaryEntryId: idSchema.optional(),
   message: z.string().max(1000)
 });
 
 export const createDiaryAccessRequestResponseSchema = z.object({
   requestId: idSchema,
-  status: diaryAccessRequestStatusSchema
+  status: diaryAccessRequestStatusSchema,
+  threshold: z.number().int().min(0).max(100).optional()
 });
 
 export const respondDiaryAccessRequestParamsSchema = z.object({
@@ -262,9 +264,9 @@ export const createDiaryCommentResponseSchema = z.object({
 
 export const createAssetUploadUrlRequestSchema = z.object({
   fileName: z.string().min(1).max(255),
-  contentType: z.string().regex(/^image\/(png|jpeg|jpg|webp|gif)$/),
-  fileSize: z.number().int().positive().max(10 * 1024 * 1024),
-  roomId: nullableIdSchema,
+  contentType: z.string().regex(/^image\/(png|jpeg|jpg|webp)$/),
+  fileSize: z.number().int().positive().max(5 * 1024 * 1024),
+  roomId: idSchema,
   role: z.enum(["clue_image"])
 });
 
@@ -272,6 +274,7 @@ export const createAssetUploadUrlResponseSchema = z.object({
   assetId: idSchema,
   uploadUrl: z.string().url(),
   storagePath: z.string(),
-  publicUrl: z.string().url().nullable(),
+  previewUrl: z.string().url(),
+  publicUrl: z.string().url().nullable().optional(),
   expiresAt: isoDateTimeSchema
 });

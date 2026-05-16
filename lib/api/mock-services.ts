@@ -18,6 +18,10 @@ import type {
   SubmitGuessRequest,
   SubmitGuessResponse
 } from "@/lib/contracts/api";
+import {
+  buildGuessedRoomDiaryMarkdown,
+  buildMutualResultDiaryMarkdown
+} from "@/lib/diary/createDiaryEntry";
 
 const nowIso = () => new Date().toISOString();
 
@@ -93,6 +97,40 @@ export async function submitGuessService(
   const textBonus = request.freeTextGuess?.trim() ? 12 : 0;
   const score = Math.min(100, 48 + selectedCount * 8 + textBonus);
   const affinityScore = Math.min(100, Math.round(score + 6));
+  const mockRoom = {
+    id: request.roomId,
+    creatorId: "mock_owner",
+    roomTitle: "想念心事小屋",
+    publicTitle: "朋友的心事小屋",
+    originalSentence: "我其实很想你，但不敢先开口。",
+    hiddenMeaning: "想念一个人但不敢先开口",
+    emotionType: "想念"
+  };
+  const mockGuess = {
+    id: guessId,
+    roomId: request.roomId,
+    playerId: "mock_player",
+    selectedObjectKeywords: request.selectedObjectIds,
+    selectedChoiceText:
+      request.selectedChoiceIndex === null
+        ? null
+        : `选项 ${request.selectedChoiceIndex}`,
+    freeTextGuess: request.freeTextGuess,
+    score,
+    affinityScore,
+    comment: "这是 mock 评分结果，后续将由服务端评分逻辑替换。",
+    partialOriginalSentence: "我其实有点..."
+  };
+
+  buildGuessedRoomDiaryMarkdown({
+    room: mockRoom,
+    guess: mockGuess
+  });
+  buildMutualResultDiaryMarkdown({
+    room: mockRoom,
+    guess: mockGuess,
+    playerDisplayName: "匿名玩家"
+  });
 
   return {
     guessId,
@@ -248,6 +286,9 @@ export async function createAssetUploadUrlService(
       storagePath
     )}`,
     storagePath,
+    previewUrl: `https://example.supabase.co/storage/v1/object/sign/room-assets/${encodeURIComponent(
+      storagePath
+    )}?preview=1`,
     publicUrl: null,
     expiresAt
   };
