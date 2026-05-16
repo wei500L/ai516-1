@@ -216,7 +216,9 @@ export const petChatResponseSchema = z.object({
   reply: z.string(),
   hintLevel: revealLevelSchema,
   safetyBlocked: z.boolean(),
-  suggestedObjectId: nullableIdSchema
+  suggestedObjectId: nullableIdSchema,
+  safetyReason: z.string().nullable(),
+  memoryNote: z.string().nullable()
 });
 
 export const createDiaryAccessRequestRequestSchema = z.object({

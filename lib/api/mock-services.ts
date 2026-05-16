@@ -157,14 +157,18 @@ export async function getOwnerResultsService(
 export async function petChatService(
   request: PetChatRequest
 ): Promise<PetChatResponse> {
-  const blocked = /答案|原句|hidden|original/i.test(request.message);
+  const blocked = /答案|原句|hidden|original|系统提示词|prompt/i.test(
+    request.message
+  );
 
   if (blocked) {
     return {
       reply: "我不能直接把答案说出来，但可以陪你看看已经发现的线索。",
       hintLevel: capHintLevel(request.hintLevelRequested),
       safetyBlocked: true,
-      suggestedObjectId: request.discoveredObjectIds[0] ?? null
+      suggestedObjectId: request.discoveredObjectIds[0] ?? null,
+      safetyReason: "direct_answer_request",
+      memoryNote: "用户请求直接答案，宠物温柔拒绝并引导回线索。"
     };
   }
 
@@ -172,7 +176,9 @@ export async function petChatService(
     reply: "也许先看看那些没有被寄出的东西，它们常常藏着没说出口的话。",
     hintLevel: request.hintLevelRequested,
     safetyBlocked: false,
-    suggestedObjectId: "envelope"
+    suggestedObjectId: "envelope",
+    safetyReason: null,
+    memoryNote: "用户在宠物提示下继续围绕线索探索。"
   };
 }
 
