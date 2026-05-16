@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, ChevronRight, Flower2, Heart, PenLine, Send } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, PenLine, Send } from "lucide-react";
 import { useMemo, useState } from "react";
+import { HanddrawnIcons } from "@/components/handbook/handdrawn-assets";
 import { HanddrawnIconButton } from "@/components/handbook/handdrawn-icon-button";
 import { PaperButton } from "@/components/handbook/paper-button";
 import { StickerTag } from "@/components/handbook/sticker-tag";
@@ -60,7 +61,7 @@ export function GuessPage({ roomId }: GuessPageProps) {
           <h1 className="soft-title pt-3 text-[34px] leading-tight">交出你的猜想</h1>
           <div className="mx-auto mt-2 flex w-36 items-center justify-center gap-2 text-coffee/36">
             <span className="h-px flex-1 bg-coffee/22" />
-            <Flower2 className="h-5 w-5" strokeWidth={1.4} />
+            <HanddrawnIcons.Flower className="h-5 w-5" />
             <span className="h-px flex-1 bg-coffee/22" />
           </div>
         </header>
@@ -85,7 +86,7 @@ export function GuessPage({ roomId }: GuessPageProps) {
         </section>
 
         <section className="mt-8">
-          <StickerTag icon={<Heart className="h-4 w-4" />} className="mb-4 text-base">
+          <StickerTag icon={<HanddrawnIcons.Heart className="h-4 w-4" />} className="mb-4 text-base">
             你觉得它更像哪一句？
           </StickerTag>
           <div className="space-y-4">

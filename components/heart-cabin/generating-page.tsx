@@ -5,8 +5,6 @@ import {
   ArrowLeft,
   BookOpen,
   Check,
-  Flower2,
-  Heart,
   Home,
   KeyRound,
   Leaf,
@@ -16,6 +14,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+import { HanddrawnIcons } from "@/components/handbook/handdrawn-assets";
 import { HanddrawnIconButton } from "@/components/handbook/handdrawn-icon-button";
 import { Tape } from "@/components/handbook/tape";
 import { TornPaperCard } from "@/components/handbook/torn-paper-card";
@@ -29,7 +28,7 @@ import { cn } from "@/lib/utils";
 const generationSteps = [
   {
     title: "读懂这句话的情绪",
-    icon: <Heart className="h-10 w-10 text-brick-red" strokeWidth={1.5} />
+    icon: <HanddrawnIcons.Heart className="h-10 w-10 text-brick-red" />
   },
   {
     title: "变成 5 个线索物件",
@@ -101,11 +100,11 @@ export function GeneratingPage() {
           <Stamp className="absolute right-2 top-0" />
           <h1 className="soft-title pt-14 text-[35px] leading-tight">
             正在把心事藏进小屋……
-            <Heart className="mb-1 ml-1 inline h-6 w-6 text-warm-orange" strokeWidth={1.7} />
+            <HanddrawnIcons.Heart className="mb-1 ml-1 inline h-6 w-6 text-warm-orange" />
           </h1>
           <div className="mx-auto mt-4 flex w-48 items-center justify-center gap-2 text-coffee/32">
             <span className="h-px flex-1 bg-coffee/24" />
-            <Flower2 className="h-5 w-5" strokeWidth={1.3} />
+            <HanddrawnIcons.Flower className="h-5 w-5" />
             <span className="h-px flex-1 bg-coffee/24" />
           </div>
         </header>
@@ -165,9 +164,9 @@ export function GeneratingPage() {
           className="mb-12 mt-8 px-7 py-5 text-center font-serif text-xl leading-8"
           tape="corner"
         >
-          <Flower2 className="mr-2 inline h-6 w-6 text-warm-orange" strokeWidth={1.4} />
+          <HanddrawnIcons.Flower className="mr-2 inline h-6 w-6 text-warm-orange" />
           别急，秘密正在被轻轻收好。
-          <Heart className="ml-2 inline h-5 w-5 text-warm-orange" strokeWidth={1.6} />
+          <HanddrawnIcons.Heart className="ml-2 inline h-5 w-5 text-warm-orange" />
         </TornPaperCard>
       </PaperPage>
     </AppShell>
@@ -237,7 +236,7 @@ function GeneratingDoorStage({ fragments }: { fragments: string[] }) {
         <div className="absolute bottom-0 left-1/2 h-56 w-40 -translate-x-1/2 rounded-t-full bg-[#b78758] shadow-paper" />
         <div className="absolute bottom-4 left-1/2 h-52 w-32 -translate-x-[30%] rounded-t-full bg-[#8e5c37] shadow-[12px_0_0_rgba(62,38,22,0.18)]">
           <div className="absolute inset-x-4 top-0 h-full bg-[repeating-linear-gradient(90deg,transparent_0_16px,rgba(55,32,16,0.20)_16px_18px)]" />
-          <Heart className="absolute left-1/2 top-20 h-7 w-7 -translate-x-1/2 text-coffee/70" strokeWidth={1.5} />
+          <HanddrawnIcons.Heart className="absolute left-1/2 top-20 h-7 w-7 -translate-x-1/2 text-coffee/70" />
           <span className="absolute right-5 top-32 h-3 w-3 rounded-full bg-parchment shadow-sticker" />
         </div>
         <motion.div

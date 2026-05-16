@@ -7,7 +7,6 @@ import {
   Check,
   Clock3,
   Dog,
-  Heart,
   Image as ImageIcon,
   Leaf,
   Mail,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
+import { HanddrawnIcons } from "@/components/handbook/handdrawn-assets";
 import { ClueNote } from "@/components/handbook/clue-note";
 import { EnvelopeCard } from "@/components/handbook/envelope-card";
 import { HanddrawnIconButton } from "@/components/handbook/handdrawn-icon-button";
@@ -70,7 +70,7 @@ export function RoomPlayPage({ roomId }: RoomPlayPageProps) {
           />
           <h1 className="soft-title px-14 pt-2 text-[37px] leading-tight">
             {room.publicTitle}
-            <Heart className="mb-1 ml-1 inline h-6 w-6 text-warm-orange" />
+            <HanddrawnIcons.Heart className="mb-1 ml-1 inline h-6 w-6 text-warm-orange" />
           </h1>
           <TornPaperCard tone="parchment" className="mx-auto mt-7 w-[82%] py-3 font-serif text-lg" tape="top">
             这里藏着一句话，找到 <strong>5</strong> 个线索来猜猜看。
@@ -497,7 +497,7 @@ export function GuessEntryButton({
   return (
     <PaperButton className="mb-12 mt-7" withTape disabled={disabled} onClick={onClick}>
       我好像猜到了
-      <Heart className="h-7 w-7 text-warm-orange" />
+      <HanddrawnIcons.Heart className="h-7 w-7 text-warm-orange" />
     </PaperButton>
   );
 }

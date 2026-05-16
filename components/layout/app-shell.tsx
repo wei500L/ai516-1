@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { MobileStatusBar } from "@/components/layout/mobile-status-bar";
+import { HanddrawnFilters } from "@/components/handbook/handdrawn-assets";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <main className="wood-desk min-h-dvh w-full overflow-hidden text-coffee">
+      <HanddrawnFilters />
       <div className="relative mx-auto min-h-dvh w-full max-w-[430px] overflow-hidden shadow-[0_0_70px_rgba(20,10,4,0.52)]">
         <MobileStatusBar dark={statusBarDark} />
         {topChrome}

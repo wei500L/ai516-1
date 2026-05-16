@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Tape } from "@/components/handbook/tape";
+import { HanddrawnTornPaper } from "@/components/handbook/handdrawn-assets";
 
 type TornPaperCardProps = {
   children: React.ReactNode;
@@ -8,12 +9,12 @@ type TornPaperCardProps = {
   tape?: "none" | "top" | "corner";
 };
 
-const toneClasses = {
-  cream: "bg-cream",
-  parchment: "bg-parchment",
-  sage: "bg-sage/24",
-  rose: "bg-[#e8b6a7]/65",
-  blue: "bg-old-blue-gray/20"
+const toneColors = {
+  cream: "var(--cream)",
+  parchment: "var(--parchment)",
+  sage: "#77805f",
+  rose: "#e8b6a7",
+  blue: "#6f7f83"
 };
 
 export function TornPaperCard({
@@ -23,16 +24,14 @@ export function TornPaperCard({
   tape = "none"
 }: TornPaperCardProps) {
   return (
-    <article
-      className={cn(
-        "torn-edge paper-grain relative overflow-visible p-4 text-coffee shadow-sticker",
-        toneClasses[tone],
-        className
-      )}
-    >
-      {tape === "top" ? <Tape className="left-1/2 top-[-13px] -translate-x-1/2 rotate-[-2deg]" /> : null}
-      {tape === "corner" ? <Tape className="-right-2 -top-3 h-6 w-16 rotate-[16deg]" /> : null}
-      {children}
-    </article>
+    <div className={cn("relative overflow-visible", className)}>
+      <HanddrawnTornPaper color={toneColors[tone]} className="w-full h-full">
+        {tape === "top" ? <Tape className="left-1/2 top-[-10px] -translate-x-1/2 rotate-[-1deg]" /> : null}
+        {tape === "corner" ? <Tape className="-right-4 -top-4 h-6 w-16 rotate-[15deg]" /> : null}
+        <div className="relative z-10 p-1 text-coffee">
+          {children}
+        </div>
+      </HanddrawnTornPaper>
+    </div>
   );
 }

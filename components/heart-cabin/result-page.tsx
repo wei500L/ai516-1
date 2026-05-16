@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   BookOpen,
   CircleEllipsis,
-  Heart,
   Home,
   LockKeyhole,
   Send,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { HanddrawnIcons } from "@/components/handbook/handdrawn-assets";
 import { HanddrawnIconButton } from "@/components/handbook/handdrawn-icon-button";
 import { PaperButton } from "@/components/handbook/paper-button";
 import { PolaroidCard } from "@/components/handbook/polaroid-card";
@@ -99,7 +99,7 @@ export function ResultPage({ guessId }: ResultPageProps) {
             还差一点：
             <br />
             {result.missedNote}
-            <Heart className="ml-1 inline h-5 w-5 text-warm-orange" />
+            <HanddrawnIcons.Heart className="ml-1 inline h-5 w-5 text-warm-orange" />
           </TornPaperCard>
           <TornPaperCard tone="cream" className="font-serif text-lg leading-8">
             <StickerTag tone="sage" className="mb-2">
