@@ -2,12 +2,14 @@ import crypto from "node:crypto";
 
 import { supabaseRest, getSupabaseServerConfig } from "@/lib/server/supabaseRest";
 import { uploadGeneratedAsset } from "@/lib/storage/uploadGeneratedAsset";
+import type { ImageAssetRole } from "@/lib/llm/pipeline/types";
 
 export type StoreGeneratedAssetInput = {
   roomId: string;
   creatorId: string;
   objectId: string;
   objectName: string;
+  assetRole?: ImageAssetRole;
   promptText: string;
   sourceType: "url" | "base64";
   buffer: Buffer;
@@ -58,7 +60,8 @@ export async function storeGeneratedAsset(
             provider_name: input.providerName,
             image_mode: input.imageMode,
             response_format: input.responseFormat,
-            object_id: input.objectId
+            object_id: input.objectId,
+            asset_role: input.assetRole ?? "clue_object_sprite"
           },
           asset_type: "image",
           role: "clue_image",

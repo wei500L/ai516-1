@@ -76,32 +76,45 @@
 输出：
 
 - `sharedStylePrompt`
+- `roomShellBackgroundPrompt`
 - `objectImagePrompts`
+- `petSpritePrompt`
+- `foregroundOccluderPrompt`
 
-每个 prompt 都面向“房间中的线索物件元素图”，不是完整场景图。统一风格为：
+图像模型不负责生成完整可玩的房间。它只生成统一视角的素材；前端负责房间壳背景、y-sort、接地阴影、前景遮挡和底部中心锚点。
+
+资产分为四类：
+
+- `room_shell_background`: 2.5D 纸板小屋房间壳背景
+- `clue_object_sprite`: 5 个可点击线索物件 sprite
+- `pet_sprite`: 小猫/小狗宠物 sprite
+- `foreground_occluder`: 前景遮挡元素
+
+线索物件 prompt 必须面向“可站在地板上的独立 2.5D game prop asset”，不是完整场景图，也不是扁平贴纸。统一风格为：
 
 - 2.5D
-- miniature handmade diorama
-- paper craft
-- cardboard
-- old paper
-- soft warm lighting
+- slightly isometric top-front view, around 45 degree camera angle
+- bottom-center anchor feeling
+- standing on a floor
+- soft contact shadow under the object
+- handmade cardboard and old paper texture
+- warm cozy lighting from upper left
 - cozy
-- storybook
 - scrapbook
-- slightly top-front angle
-- isolated object asset
+- clean cutout
 - transparent or clean background preference
+- readable at mobile size
 
 默认负向约束包括：
 
-- no full room scene
-- no realistic product photography
+- no full room background
+- no flat sticker
+- no icon
+- no front-facing illustration
+- no text
 - no cyberpunk
-- no futuristic UI
-- no glassmorphism
 - no neon
-- no complex background
+- no photorealistic product photo
 
 ## Step 4: 生成计划
 
@@ -110,11 +123,12 @@
 - `buildRoomAssetPlan(semanticAnalysis, roomDesign, imagePromptPlan, provider)`
 - 或完整调用 `createRoomAssetPlan(input, provider)`
 
-`generationPlan.jobs` 会把每个物件提示词整理为后续图像生成任务：
+`generationPlan.jobs` 会把 8 个素材提示词整理为后续图像生成任务：
 
 - `jobId`
 - `objectId`
 - `objectName`
+- `assetRole`
 - `prompt`
 - `negativePrompt`
 - `size`

@@ -7,7 +7,20 @@ export type MiniRoomPosition = {
   layer: number;
 };
 
-export type MiniRoomAnchor = "bottom-center" | "center" | "top-left";
+export type MiniRoomAnchor =
+  | {
+      x: number;
+      y: number;
+    }
+  | "bottom-center"
+  | "center"
+  | "top-left";
+
+export const MINI_ROOM_BOTTOM_CENTER_ANCHOR = { x: 0.5, y: 1 } as const;
+
+function bottomCenterAnchor(): MiniRoomAnchor {
+  return { ...MINI_ROOM_BOTTOM_CENTER_ANCHOR };
+}
 
 export type MiniRoomShadow = {
   enabled: boolean;
@@ -48,6 +61,10 @@ export type MiniRoomPet = {
   type: "cat" | "dog";
   name: string;
   position: MiniRoomPosition;
+  anchor: MiniRoomAnchor;
+  scale: number;
+  assetUrl: string | null;
+  shadow: MiniRoomShadow;
   chatEnabled: boolean;
 };
 
@@ -80,6 +97,7 @@ export type AdaptedPublicRoom = {
   publicTitle: string;
   visualTheme: string;
   renderTarget: "2.5d_miniature_cabin";
+  camera: "top_down_2_5d";
   stage: MiniRoomStage;
   objects: MiniRoomObject[];
   imageClue: GetRoomPlayResponse["imageClue"];
@@ -101,7 +119,7 @@ const fallbackStage: MiniRoomStage = {
       assetUrl: null,
       alt: "地毯前缘",
       position: { x: 50, y: 83, z: 2, layer: 4200 },
-      anchor: "bottom-center",
+      anchor: bottomCenterAnchor(),
       width: 278,
       height: 44,
       scale: 1,
@@ -115,7 +133,7 @@ const fallbackStage: MiniRoomStage = {
       assetUrl: null,
       alt: "桌子前沿",
       position: { x: 50, y: 68, z: 7, layer: 3900 },
-      anchor: "bottom-center",
+      anchor: bottomCenterAnchor(),
       width: 218,
       height: 58,
       scale: 1,
@@ -129,7 +147,7 @@ const fallbackStage: MiniRoomStage = {
       assetUrl: null,
       alt: "纸板地板前缘",
       position: { x: 50, y: 96, z: 1, layer: 6100 },
-      anchor: "bottom-center",
+      anchor: bottomCenterAnchor(),
       width: 392,
       height: 42,
       scale: 1,
@@ -157,11 +175,25 @@ function clampPercent(value: number) {
 }
 
 function isAnchor(value: unknown): value is MiniRoomAnchor {
-  return value === "bottom-center" || value === "center" || value === "top-left";
+  if (value === "bottom-center" || value === "center" || value === "top-left") {
+    return true;
+  }
+
+  if (typeof value !== "object" || !value) {
+    return false;
+  }
+
+  const anchor = value as Record<string, unknown>;
+
+  return typeof anchor.x === "number" && typeof anchor.y === "number";
 }
 
 function adaptAnchor(value: unknown): MiniRoomAnchor {
-  return isAnchor(value) ? value : "bottom-center";
+  if (value === "bottom-center") {
+    return bottomCenterAnchor();
+  }
+
+  return isAnchor(value) ? value : bottomCenterAnchor();
 }
 
 function adaptPosition(
@@ -276,16 +308,21 @@ function adaptStage(stage: GetRoomPlayResponse["stage"] | undefined): MiniRoomSt
 
 function adaptPet(room: GetRoomPlayResponse): MiniRoomPet {
   const type = room.pet.type ?? (room.pet.mood === "dog" ? "dog" : "cat");
+  const position = {
+    x: clampPercent(finiteNumber(room.pet.position?.x, 84)),
+    y: clampPercent(finiteNumber(room.pet.position?.y, 80)),
+    z: finiteNumber(room.pet.position?.z, 8),
+    layer: Math.round(finiteNumber(room.pet.position?.layer, 50))
+  };
 
   return {
     type,
     name: room.pet.name,
-    position: {
-      x: clampPercent(finiteNumber(room.pet.position?.x, 84)),
-      y: clampPercent(finiteNumber(room.pet.position?.y, 80)),
-      z: finiteNumber(room.pet.position?.z, 8),
-      layer: Math.round(finiteNumber(room.pet.position?.layer, 50))
-    },
+    position,
+    anchor: adaptAnchor(room.pet.anchor),
+    scale: Math.max(0.55, Math.min(1.35, finiteNumber(room.pet.scale, 1))),
+    assetUrl: room.pet.assetUrl?.trim() || room.pet.avatarUrl?.trim() || null,
+    shadow: adaptShadow(room.pet.shadow, 78, position),
     chatEnabled: room.pet.chatEnabled ?? true
   };
 }
@@ -298,6 +335,7 @@ export function adaptRoomPublicData(
     publicTitle: room.publicTitle,
     visualTheme: room.visualTheme,
     renderTarget: room.renderTarget ?? "2.5d_miniature_cabin",
+    camera: room.camera ?? "top_down_2_5d",
     stage: adaptStage(room.stage),
     objects: room.objects.map((object, index) => {
       const position = adaptPosition(object.position, index);

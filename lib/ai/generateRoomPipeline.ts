@@ -41,6 +41,42 @@ const HEART_CABIN_STYLE = [
   "不要玻璃拟态"
 ].join("，");
 
+const CLUE_OBJECT_SPRITE_TEMPLATE = [
+  "single isolated 2.5D game prop asset",
+  "placed inside a cozy handmade cardboard miniature room",
+  "slightly isometric top-front view, around 45 degree camera angle",
+  "bottom-center anchor feeling",
+  "standing on a floor",
+  "soft contact shadow under the object",
+  "handmade cardboard and old paper texture",
+  "warm cozy lighting from upper left",
+  "clean cutout",
+  "transparent background if supported",
+  "readable at mobile size",
+  "no full room background",
+  "no flat sticker",
+  "no icon",
+  "no front-facing illustration",
+  "no text",
+  "no neon",
+  "no cyberpunk",
+  "no photorealistic product photo"
+].join(", ");
+
+const ROOM_SHELL_BACKGROUND_TEMPLATE = [
+  "2.5D top-down mobile game room shell background",
+  "handmade cardboard miniature room",
+  "old paper scrapbook style",
+  "back wall, left wall, right wall, warm floor",
+  "window, lamp, bookshelf, desk base, plants",
+  "clear empty spaces for 5 interactive clue objects",
+  "warm light from upper left",
+  "soft corner shadows",
+  "no main clue objects",
+  "no characters",
+  "no readable text"
+].join(", ");
+
 const ANALYSIS_SYSTEM_PROMPT = [
   "你是《心事小屋》的语义分析助手，只输出符合 JSON Schema 的对象。",
   "你的任务是分析用户心事的情绪、关系张力和可隐喻表达。",
@@ -60,10 +96,13 @@ const NARRATIVE_SYSTEM_PROMPT = [
 
 const IMAGE_PROMPT_SYSTEM_PROMPT = [
   "你是《心事小屋》的线索物件图像提示词设计师，只输出符合 JSON Schema 的对象。",
-  "每张图只画一个小屋中的线索物件元素，不是完整大场景。",
+  "不要指望生图模型直接生成完整可玩的 2.5D 房间；当前旧入口只生成 5 个 clue_object_sprite，前端负责房间壳、y-sort、接地阴影、前景遮挡和底部中心锚点。",
+  "每张图只画一个小屋中的线索物件 sprite，不是完整大场景。",
   `统一视觉风格：${HEART_CABIN_STYLE}。`,
+  `每个 prompt 必须包含或等价表达：${CLUE_OBJECT_SPRITE_TEMPLATE}。`,
+  `房间壳背景由新版 pipeline 使用此模板单独生成：${ROOM_SHELL_BACKGROUND_TEMPLATE}。`,
   "提示词必须适合图像模型直接生成，并明确透明或干净背景，方便前端组合进 2.5D 小屋。",
-  "禁止科技感、赛博风、玻璃拟态、金属 UI、霓虹。"
+  "禁止科技感、赛博风、玻璃拟态、金属 UI、霓虹、可读文字、正面扁平贴纸。"
 ].join("\n");
 
 function buildStructuredPrompt(task: string, payload: unknown) {
@@ -145,7 +184,14 @@ async function generateImagePrompts(
           visualDescription: object.visualDescription,
           keyword: object.keyword
         }))
-      }
+      },
+      requiredPromptTemplate: CLUE_OBJECT_SPRITE_TEMPLATE,
+      assetCategories: [
+        "clue_object_sprite",
+        "room_shell_background",
+        "pet_sprite",
+        "foreground_occluder"
+      ]
     }),
     temperature: 0.25
   });
@@ -238,6 +284,13 @@ export async function generateRoomWithImages(
   assertNarrative(narrative, parsedInput.sentence);
 
   const imagePrompts = await generateImagePrompts(narrative, analysis, client);
+  for (const prompt of imagePrompts.objects) {
+    if (!prompt.prompt.includes("single isolated 2.5D game prop asset")) {
+      throw new Error(
+        `Generated image prompt missing 2.5D prop asset requirement for ${prompt.objectId}`
+      );
+    }
+  }
   const promptByObjectId = new Map(
     imagePrompts.objects.map((object) => [object.objectId, object])
   );
@@ -280,6 +333,21 @@ export async function generateRoomWithImages(
     hiddenMeaning: narrative.hiddenMeaning.trim(),
     objects
   };
+  const objectAssets = imageResults.map(([objectId, image]) => {
+    const object = narrative.objects.find((item) => item.id === objectId);
+
+    return {
+      objectId,
+      objectName: object?.name ?? objectId,
+      assetRole: "clue_object_sprite" as const,
+      status: "success" as const,
+      assetId: objectId,
+      storagePath: image.storagePath ?? "",
+      publicUrl: image.url,
+      sourceType: image.sourceType,
+      mimeType: image.mimeType ?? "image/png"
+    };
+  });
   const roomJson = buildRoomJson({
     roomId,
     originalSentence: parsedInput.sentence,
@@ -289,6 +357,7 @@ export async function generateRoomWithImages(
       implicitNeed: analysis.implicitNeed
     },
     room,
+    objectAssets,
     generation: {
       imageGenerationMode: config.imageGenerationMode,
       chatModel: config.chatModel,
@@ -298,7 +367,7 @@ export async function generateRoomWithImages(
 
   return {
     room,
-    roomJson,
+    roomJson: roomJson as unknown as Record<string, unknown>,
     analysis,
     imagePrompts
   };

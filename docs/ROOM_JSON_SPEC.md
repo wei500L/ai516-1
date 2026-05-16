@@ -10,6 +10,7 @@ Internal `room_json` may be stored on `rooms.room_json` and used by server-side 
 type RoomJson = {
   schemaVersion: 1;
   renderTarget: "2.5d_miniature_cabin";
+  camera: "top_down_2_5d";
   roomId: string;
   roomTitle: string;
   publicTitle: string;
@@ -20,7 +21,7 @@ type RoomJson = {
     roomShellType: string;
     lighting: string;
     floorStyle: string;
-    backgroundAsset?: StageAsset | null;
+    backgroundAsset?: StageAsset | null; // room_shell_background
     foreground?: StageAsset[];
   };
   objects: Array<{
@@ -34,7 +35,7 @@ type RoomJson = {
       z?: number;
       layer?: number;
     };
-    anchor?: "bottom-center" | "center" | "top-left";
+    anchor: { x: 0.5; y: 1 };
     scale?: number;
     assetUrl?: string;
     shadow?: {
@@ -51,7 +52,7 @@ type RoomJson = {
       height: number;
       style: string;
       interactive: true;
-      anchor?: "bottom-center" | "center" | "top-left";
+      anchor: { x: 0.5; y: 1 };
       scale?: number;
       shadow?: {
         enabled: boolean;
@@ -76,6 +77,17 @@ type RoomJson = {
       y: number;
       z?: number;
       layer?: number;
+    };
+    anchor: { x: 0.5; y: 1 };
+    scale: number;
+    assetUrl?: string;
+    shadow?: {
+      enabled: boolean;
+      width: number;
+      height: number;
+      opacity: number;
+      blur: number;
+      offsetY: number;
     };
     chatEnabled: true;
     personality?: string;
@@ -102,7 +114,7 @@ type StageAsset = {
     z?: number;
     layer?: number;
   };
-  anchor?: "bottom-center" | "center" | "top-left";
+  anchor?: { x: number; y: number } | "bottom-center" | "center" | "top-left";
   width: number;
   height: number;
   scale?: number;
@@ -136,6 +148,7 @@ It preserves:
 - `stage`
 - `stage.backgroundAsset`
 - `stage.foreground`
+- `camera`
 - object `position`
 - object `assetUrl`
 - object `anchor`
@@ -145,7 +158,7 @@ It preserves:
 - object `interactionType`
 - `imageClue`
 - public `choices` labels without correctness
-- pet position and chat availability
+- pet position, anchor, asset URL, shadow, and chat availability
 
 `buildPlayApiResponse` also keeps backward-compatible fields required by the current API schema: `title`, `description`, `discovered`, `imageUrl`, `pet.avatarUrl`, `pet.mood`, and `progress`.
 
@@ -157,7 +170,7 @@ Coordinates are percentages on a fixed 2.5D stage:
 - `y`: vertical position from top to bottom, `0..100`
 - `z`: pseudo-depth for 2.5D scale/shadow decisions
 - `layer`: draw order, larger values render in front
-- `anchor`: interactive objects should default to `bottom-center`, so `position.y` means the foot/contact point on the floor
+- `anchor`: interactive objects use `{ x: 0.5, y: 1 }`, so `position.y` means the foot/contact point on the floor; clients may still accept legacy `"bottom-center"`
 - `scale`: optional render multiplier; clients can still add small depth-based scaling
 - `shadow`: soft contact shadow under the anchor point
 
@@ -189,10 +202,14 @@ The play page should:
 
 - Treat `objects[].render.assetUrl` as the generated clue object image.
 - Treat `objects[].assetUrl` as a convenient top-level alias for the generated clue object image when present.
+- Use `stage.backgroundAsset` as the generated room shell when present; otherwise use the CSS fallback shell.
 - Use `render.width`, `render.height`, `anchor`, `scale`, `shadow`, and `position.layer` for deterministic paper miniature placement.
 - Draw interactive clue objects with bottom-center anchors and a soft contact shadow so they appear grounded.
 - Y-sort the object layer from smaller `position.y` to larger `position.y`; larger `y` renders visually in front.
 - Draw `stage.foreground` after the object layer for table fronts, door frames, cardboard edges, rug lips, and other occluders.
+- Draw `pet.assetUrl` as a bottom-center anchored pet sprite when present; otherwise use the paper placeholder pet.
+- On tap/hover/focus, lift clue sprites by 3-6px and show a warm halo.
+- If a clue sprite image fails, render a paper-style placeholder object with the same anchor, shadow, and y-sort behavior.
 - Use `stage` for the room shell, floor, background, and lighting styling.
 - Use `interactionType` to decide tap behavior.
 - Never infer correctness from choice order beyond sending `selectedChoiceIndex` back to the server.

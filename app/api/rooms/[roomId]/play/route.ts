@@ -38,10 +38,28 @@ type StoredRoomObject = {
   interactionType?: unknown;
 };
 
+type PublicAnchor = NonNullable<
+  NonNullable<GetRoomPlayResponse["objects"][number]["anchor"]>
+>;
+
 function asString(value: unknown, fallback: string) {
   return typeof value === "string" && value.trim().length > 0
     ? value
     : fallback;
+}
+
+function isAnchor(value: unknown): value is PublicAnchor {
+  if (value === "bottom-center" || value === "center" || value === "top-left") {
+    return true;
+  }
+
+  if (typeof value !== "object" || !value) {
+    return false;
+  }
+
+  const anchor = asRecord(value as Json);
+
+  return typeof anchor.x === "number" && typeof anchor.y === "number";
 }
 
 function readRoomJsonObjects(roomJson: Json): GetRoomPlayResponse["objects"] {
@@ -79,9 +97,7 @@ function readRoomJsonObjects(roomJson: Json): GetRoomPlayResponse["objects"] {
       ...(typeof object.position === "object" && object.position
         ? { position: object.position as GetRoomPlayResponse["objects"][number]["position"] }
         : {}),
-      ...(object.anchor === "bottom-center" ||
-      object.anchor === "center" ||
-      object.anchor === "top-left"
+      ...(isAnchor(object.anchor)
         ? { anchor: object.anchor }
         : {}),
       ...(typeof object.scale === "number" ? { scale: object.scale } : {}),
@@ -166,6 +182,9 @@ async function getPersistedRoomPlay(
             roomJson.renderTarget as GetRoomPlayResponse["renderTarget"]
         }
       : {}),
+    ...(roomJson.camera === "top_down_2_5d"
+      ? { camera: roomJson.camera as GetRoomPlayResponse["camera"] }
+      : {}),
     ...(typeof roomJson.stage === "object" && roomJson.stage
       ? { stage: roomJson.stage as GetRoomPlayResponse["stage"] }
       : {}),
@@ -179,6 +198,12 @@ async function getPersistedRoomPlay(
       ...(pet.type === "cat" || pet.type === "dog" ? { type: pet.type } : {}),
       ...(typeof pet.position === "object" && pet.position
         ? { position: pet.position as GetRoomPlayResponse["pet"]["position"] }
+        : {}),
+      ...(isAnchor(pet.anchor) ? { anchor: pet.anchor } : {}),
+      ...(typeof pet.scale === "number" ? { scale: pet.scale } : {}),
+      ...(typeof pet.assetUrl === "string" ? { assetUrl: pet.assetUrl } : {}),
+      ...(typeof pet.shadow === "object" && pet.shadow
+        ? { shadow: pet.shadow as GetRoomPlayResponse["pet"]["shadow"] }
         : {}),
       ...(pet.chatEnabled === true ? { chatEnabled: true as const } : {})
     },

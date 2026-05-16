@@ -72,6 +72,7 @@ function fallbackDiscovered(progressIds: Set<string>, object: MiniRoomObject) {
 
 function BackgroundLayer({ room }: { room: AdaptedPublicRoom }) {
   const background = room.stage.backgroundAsset;
+  const hasGeneratedBackground = Boolean(background?.assetUrl);
 
   return (
     <div className="absolute inset-0 z-0">
@@ -84,6 +85,9 @@ function BackgroundLayer({ room }: { room: AdaptedPublicRoom }) {
           draggable={false}
         />
       ) : null}
+      {hasGeneratedBackground ? (
+        <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_34px_rgba(62,35,18,0.2)]" />
+      ) : null}
     </div>
   );
 }
@@ -92,7 +96,7 @@ function BackWallLayer({ room }: { room: AdaptedPublicRoom }) {
   const colors = stagePalette(room.visualTheme);
 
   return (
-    <div className="absolute inset-0 z-10 overflow-hidden">
+    <div className={cn("absolute inset-0 z-10 overflow-hidden", room.stage.backgroundAsset?.assetUrl && "opacity-0")}>
       <div
         className="absolute left-1/2 top-0 h-[94%] w-[96%] -translate-x-1/2 shadow-paper"
         style={{
@@ -149,7 +153,7 @@ function FurnitureLayer({ room }: { room: AdaptedPublicRoom }) {
   const colors = stagePalette(room.visualTheme);
 
   return (
-    <div className="absolute inset-0 z-20 pointer-events-none">
+    <div className={cn("absolute inset-0 z-20 pointer-events-none", room.stage.backgroundAsset?.assetUrl && "opacity-0")}>
       <div
         className="absolute left-[18%] top-[28%] h-[17%] w-[18%] border-[5px] shadow-insetPaper"
         style={{ borderColor: "#6e4427", background: "#f2c06c33" }}
@@ -182,20 +186,27 @@ function FurnitureLayer({ room }: { room: AdaptedPublicRoom }) {
 }
 
 function OccluderAsset({ asset }: { asset: MiniRoomStageAsset }) {
+  const xPercent = typeof asset.anchor === "object"
+    ? asset.anchor.x * 100
+    : asset.anchor === "top-left"
+    ? 0
+    : 50;
+  const yPercent = typeof asset.anchor === "object"
+    ? asset.anchor.y * 100
+    : asset.anchor === "center"
+    ? 50
+    : asset.anchor === "top-left"
+    ? 0
+    : 100;
   const style = {
     left: `${asset.position.x}%`,
     top: `${asset.position.y}%`,
     zIndex: asset.layer,
     width: asset.width * asset.scale,
     height: asset.height * asset.scale,
-    opacity: asset.opacity
+    opacity: asset.opacity,
+    transform: `translate(-${xPercent}%, -${yPercent}%)`
   };
-  const anchorClass =
-    asset.anchor === "center"
-      ? "-translate-x-1/2 -translate-y-1/2"
-      : asset.anchor === "top-left"
-      ? ""
-      : "-translate-x-1/2 -translate-y-full";
 
   if (asset.assetUrl) {
     return (
@@ -203,7 +214,7 @@ function OccluderAsset({ asset }: { asset: MiniRoomStageAsset }) {
         src={asset.assetUrl}
         alt={asset.alt}
         draggable={false}
-        className={cn("pointer-events-none absolute object-contain", anchorClass)}
+        className="pointer-events-none absolute object-contain"
         style={style}
       />
     );
@@ -211,7 +222,7 @@ function OccluderAsset({ asset }: { asset: MiniRoomStageAsset }) {
 
   return (
     <div
-      className={cn("pointer-events-none absolute", anchorClass)}
+      className="pointer-events-none absolute"
       style={style}
       aria-hidden="true"
     >

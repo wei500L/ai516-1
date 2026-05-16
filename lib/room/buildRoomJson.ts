@@ -7,6 +7,7 @@ import type {
   SemanticAnalysis
 } from "../llm/pipeline/types";
 import {
+  bottomCenterAnchor,
   getLayoutForObject,
   getStageForTheme,
   type RoomObjectAnchor,
@@ -41,6 +42,10 @@ export type RoomJsonPet = {
   type: "cat" | "dog";
   name: string;
   position: RoomObjectPosition;
+  anchor: RoomObjectAnchor;
+  scale: number;
+  assetUrl: string;
+  shadow: RoomObjectShadow;
   chatEnabled: true;
   personality?: string;
 };
@@ -48,6 +53,7 @@ export type RoomJsonPet = {
 export type RoomJson = {
   schemaVersion: 1;
   renderTarget: "2.5d_miniature_cabin";
+  camera: "top_down_2_5d";
   roomId: string;
   roomTitle: string;
   publicTitle: string;
@@ -131,7 +137,11 @@ function buildAssetMap(input: BuildRoomJsonInput) {
   const map = new Map<string, string>();
 
   input.objectAssets?.forEach((asset) => {
-    if (isSuccessfulAsset(asset) && asset.publicUrl) {
+    if (
+      isSuccessfulAsset(asset) &&
+      asset.assetRole === "clue_object_sprite" &&
+      asset.publicUrl
+    ) {
       map.set(asset.objectId, asset.publicUrl);
     }
   });
@@ -143,6 +153,63 @@ function buildAssetMap(input: BuildRoomJsonInput) {
   });
 
   return map;
+}
+
+function findAssetByRole(
+  input: BuildRoomJsonInput,
+  role: ObjectImageJobSuccess["assetRole"]
+) {
+  return input.objectAssets?.find(
+    (asset): asset is ObjectImageJobSuccess =>
+      isSuccessfulAsset(asset) && asset.assetRole === role && Boolean(asset.publicUrl)
+  );
+}
+
+function mergeGeneratedStageAssets(
+  stage: RoomStage,
+  input: BuildRoomJsonInput
+): RoomStage {
+  const background = findAssetByRole(input, "room_shell_background");
+  const foreground = findAssetByRole(input, "foreground_occluder");
+  const nextForeground = [...stage.foreground];
+
+  if (foreground?.publicUrl) {
+    nextForeground.push({
+      id: "generated_foreground_occluder",
+      kind: "foreground_occluder",
+      assetUrl: foreground.publicUrl,
+      alt: "前景遮挡纸板层",
+      position: { x: 50, y: 92, z: 2, layer: 6200 },
+      anchor: bottomCenterAnchor(),
+      width: 390,
+      height: 118,
+      scale: 1,
+      opacity: 0.96,
+      layer: 6200,
+      style: "generated-paper-foreground-occluder"
+    });
+  }
+
+  return {
+    ...stage,
+    backgroundAsset: background?.publicUrl
+      ? {
+          id: "generated_room_shell_background",
+          kind: "room_shell_background",
+          assetUrl: background.publicUrl,
+          alt: "2.5D 纸板小屋房间壳背景",
+          position: { x: 50, y: 100, z: 0, layer: 0 },
+          anchor: bottomCenterAnchor(),
+          width: 390,
+          height: 500,
+          scale: 1,
+          opacity: 1,
+          layer: 0,
+          style: "generated-2_5d-room-shell-background"
+        }
+      : stage.backgroundAsset ?? null,
+    foreground: nextForeground
+  };
 }
 
 function normalizeInteractionType(value: string | undefined): RoomInteractionType {
@@ -225,7 +292,7 @@ function buildObjects(input: BuildRoomJsonInput): RoomJsonObject[] {
     const layout = getLayoutForObject(object, index, visualTheme, usedSlotKeys);
     const assetUrl = assetByObjectId.get(object.id) ?? "";
     const scale = Number((0.9 + Math.max(0, Math.min(100, layout.position.y)) / 520).toFixed(2));
-    const anchor = "bottom-center" as const;
+    const anchor = bottomCenterAnchor();
     const shadow = buildObjectShadow(layout);
 
     return {
@@ -261,6 +328,7 @@ export function buildRoomJson(input: BuildRoomJsonInput): RoomJson {
   const visualTheme = design?.visualTheme ?? room?.visualTheme ?? "old_paper_dollhouse";
   const petHints = design?.petPersonaHints;
   const pet = room?.pet;
+  const petType = normalizePetType(petHints?.type ?? pet?.type);
   const hiddenMeaning =
     input.semanticAnalysis?.hiddenMeaning ??
     room?.hiddenMeaning ??
@@ -273,10 +341,22 @@ export function buildRoomJson(input: BuildRoomJsonInput): RoomJson {
           clue: input.imageClue.clue
         }
       : undefined;
+  const stage = mergeGeneratedStageAssets(getStageForTheme(visualTheme), input);
+  const petAsset = findAssetByRole(input, "pet_sprite");
+  const petPosition = { x: 82, y: 80, z: 10, layer: 48 };
+  const petShadow = {
+    enabled: true,
+    width: 68,
+    height: 18,
+    opacity: 0.28,
+    blur: 9,
+    offsetY: 6
+  };
 
   return {
     schemaVersion: 1,
     renderTarget: "2.5d_miniature_cabin",
+    camera: "top_down_2_5d",
     roomId: input.roomId,
     roomTitle: design?.roomTitle ?? room?.roomTitle ?? "心事小屋",
     publicTitle: design?.publicTitle ?? room?.publicTitle ?? "一间等待被读懂的小屋",
@@ -286,15 +366,17 @@ export function buildRoomJson(input: BuildRoomJsonInput): RoomJson {
       input.semanticAnalysis?.coreEmotion ??
       "未命名情绪",
     visualTheme,
-    stage: getStageForTheme(visualTheme),
+    stage,
     objects: buildObjects(input),
     ...(imageClue ? { imageClue } : {}),
     pet: {
-      type: normalizePetType(petHints?.type ?? pet?.type),
-      name: petHints?.type === "dog"
-        ? pet?.name ?? "纸团"
-        : pet?.name ?? "纸团",
-      position: { x: 82, y: 80, z: 10, layer: 48 },
+      type: petType,
+      name: pet?.name ?? (petType === "dog" ? "纸团" : "纸团"),
+      position: petPosition,
+      anchor: bottomCenterAnchor(),
+      scale: 1,
+      assetUrl: petAsset?.publicUrl ?? "",
+      shadow: petShadow,
       chatEnabled: true,
       personality:
         pet?.personality ??

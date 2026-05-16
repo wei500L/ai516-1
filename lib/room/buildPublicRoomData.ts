@@ -78,11 +78,15 @@ export function buildPlayApiResponse(roomJson: RoomJson): GetRoomPlayResponse {
       : null,
     pet: {
       name: publicRoom.pet.name,
-      avatarUrl: null,
+      avatarUrl: publicRoom.pet.assetUrl || null,
       mood: publicRoom.pet.type,
       maxHintLevel: 3,
       type: publicRoom.pet.type,
       position: publicRoom.pet.position,
+      anchor: publicRoom.pet.anchor,
+      scale: publicRoom.pet.scale,
+      assetUrl: publicRoom.pet.assetUrl || null,
+      shadow: publicRoom.pet.shadow,
       chatEnabled: publicRoom.pet.chatEnabled
     },
     choices: publicRoom.choices,

@@ -50,6 +50,16 @@ export const roomObjectAnchorSchema = z.enum([
   "top-left"
 ]);
 
+export const roomObjectAnchorPointSchema = z.object({
+  x: z.number(),
+  y: z.number()
+});
+
+export const roomAnchorSchema = z.union([
+  roomObjectAnchorSchema,
+  roomObjectAnchorPointSchema
+]);
+
 export const roomObjectShadowSchema = z.object({
   enabled: z.boolean(),
   width: z.number(),
@@ -65,7 +75,7 @@ export const roomStageAssetSchema = z.object({
   assetUrl: z.string().optional(),
   alt: z.string().optional(),
   position: roomObjectPositionSchema,
-  anchor: roomObjectAnchorSchema.optional(),
+  anchor: roomAnchorSchema.optional(),
   width: z.number(),
   height: z.number(),
   scale: z.number().optional(),
@@ -80,7 +90,7 @@ export const roomObjectRenderSchema = z.object({
   height: z.number(),
   style: z.string(),
   interactive: z.literal(true),
-  anchor: roomObjectAnchorSchema.optional(),
+  anchor: roomAnchorSchema.optional(),
   scale: z.number().optional(),
   shadow: roomObjectShadowSchema.optional()
 });
@@ -105,7 +115,7 @@ export const publicRoomObjectSchema = z.object({
   imageUrl: z.string().nullable().optional(),
   assetUrl: z.string().nullable().optional(),
   position: roomObjectPositionSchema.optional(),
-  anchor: roomObjectAnchorSchema.optional(),
+  anchor: roomAnchorSchema.optional(),
   scale: z.number().optional(),
   shadow: roomObjectShadowSchema.optional(),
   render: roomObjectRenderSchema.optional(),
@@ -126,6 +136,10 @@ export const publicPetSchema = z.object({
   maxHintLevel: revealLevelSchema,
   type: z.enum(["cat", "dog"]).optional(),
   position: roomObjectPositionSchema.optional(),
+  anchor: roomAnchorSchema.optional(),
+  scale: z.number().optional(),
+  assetUrl: z.string().nullable().optional(),
+  shadow: roomObjectShadowSchema.optional(),
   chatEnabled: z.literal(true).optional()
 });
 
@@ -198,6 +212,7 @@ export const getRoomPlayResponseSchema = z.object({
   publicTitle: z.string(),
   visualTheme: z.string(),
   renderTarget: z.literal("2.5d_miniature_cabin").optional(),
+  camera: z.literal("top_down_2_5d").optional(),
   stage: publicRoomStageSchema.optional(),
   objects: z.array(publicRoomObjectSchema),
   imageClue: publicImageClueSchema.nullable(),

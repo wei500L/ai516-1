@@ -15,7 +15,20 @@ export type RoomStage = {
   foreground: RoomStageAsset[];
 };
 
-export type RoomObjectAnchor = "bottom-center" | "center" | "top-left";
+export type RoomObjectAnchor =
+  | {
+      x: number;
+      y: number;
+    }
+  | "bottom-center"
+  | "center"
+  | "top-left";
+
+export const BOTTOM_CENTER_ANCHOR = { x: 0.5, y: 1 } as const;
+
+export function bottomCenterAnchor(): Extract<RoomObjectAnchor, { x: number; y: number }> {
+  return { ...BOTTOM_CENTER_ANCHOR };
+}
 
 export type RoomObjectShadow = {
   enabled: boolean;
@@ -86,7 +99,7 @@ const DEFAULT_FOREGROUND: RoomStageAsset[] = [
     id: "rug_front_edge",
     kind: "rug_front",
     position: { x: 50, y: 83, z: 2, layer: 4200 },
-    anchor: "bottom-center",
+    anchor: bottomCenterAnchor(),
     width: 278,
     height: 44,
     scale: 1,
@@ -97,7 +110,7 @@ const DEFAULT_FOREGROUND: RoomStageAsset[] = [
     id: "table_front_edge",
     kind: "table_front",
     position: { x: 50, y: 68, z: 7, layer: 3900 },
-    anchor: "bottom-center",
+    anchor: bottomCenterAnchor(),
     width: 218,
     height: 58,
     scale: 1,
@@ -108,7 +121,7 @@ const DEFAULT_FOREGROUND: RoomStageAsset[] = [
     id: "left_cardboard_edge",
     kind: "cardboard_edge",
     position: { x: 4, y: 67, z: 4, layer: 5200 },
-    anchor: "bottom-center",
+    anchor: bottomCenterAnchor(),
     width: 46,
     height: 330,
     scale: 1,
@@ -119,7 +132,7 @@ const DEFAULT_FOREGROUND: RoomStageAsset[] = [
     id: "right_cardboard_edge",
     kind: "cardboard_edge",
     position: { x: 96, y: 67, z: 4, layer: 5200 },
-    anchor: "bottom-center",
+    anchor: bottomCenterAnchor(),
     width: 46,
     height: 330,
     scale: 1,
@@ -130,7 +143,7 @@ const DEFAULT_FOREGROUND: RoomStageAsset[] = [
     id: "front_floor_lip",
     kind: "paper_floor_lip",
     position: { x: 50, y: 96, z: 1, layer: 6100 },
-    anchor: "bottom-center",
+    anchor: bottomCenterAnchor(),
     width: 392,
     height: 42,
     scale: 1,

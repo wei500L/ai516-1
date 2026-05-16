@@ -1,6 +1,17 @@
-# 《心事小屋》线索物件图像生成流水线
+# 《心事小屋》2.5D 图像生成流水线
 
-本模块位于 `lib/llm/imageJobs/*`，负责把 `RoomAssetPlan.imagePromptPlan` 中的 5 个线索物件 prompt 并发变成可落库的图片资产。
+本模块位于 `lib/llm/imageJobs/*`，负责把 `RoomAssetPlan.imagePromptPlan` 中的 2.5D 素材 prompt 并发变成可落库的图片资产。
+
+核心策略：不要指望生图模型直接生成完整可玩的 2.5D 房间。生图模型只负责生成统一视角的素材；真正的 2.5D 空间由前端通过房间壳背景、y-sort、接地阴影、前景遮挡和底部中心锚点实现。
+
+## 资产类型
+
+`generationPlan.jobs` 固定包含 8 条：
+
+- `room_shell_background`: 2.5D 纸板小屋房间壳背景
+- `clue_object_sprite`: 5 个可点击线索物件 sprite
+- `pet_sprite`: 小猫/小狗宠物 sprite
+- `foreground_occluder`: 前景遮挡元素，例如桌边、门框、地毯边缘
 
 ## 输入
 
@@ -9,11 +20,11 @@
 - `roomId`
 - `creatorId`
 
-其中 `roomAssetPlan.imagePromptPlan.objectImagePrompts` 固定 5 条。
+其中 `roomAssetPlan.imagePromptPlan.objectImagePrompts` 固定 5 条，另外还有 `roomShellBackgroundPrompt`、`petSpritePrompt` 和 `foregroundOccluderPrompt`。
 
 ## 处理流程
 
-1. `runObjectImageJobs()` 读取 5 个 prompt。
+1. `runObjectImageJobs()` 读取 `generationPlan.jobs`。
 2. 通过 Promise-based limiter 并发执行，限制值取自 `provider.config.maxConcurrentImageJobs`。
 3. 每个任务调用 provider 的 `imageGeneration()`。
 4. 对返回值执行 `normalizeImageResponse()`，兼容：
@@ -57,7 +68,8 @@
 
 - 资产表：`room_assets`
 - 资产类型：`image`
-- 角色：`clue_image`
+- 角色：`clue_image`（兼容旧表枚举）
+- 细分角色：写入 `signed_url_strategy.asset_role`
 - 存储桶：`room-assets`
 
 服务端优先使用 Supabase Storage。若没有配置 Supabase 服务角色，则会回退到本地 `public/generated/room-assets/`，以保证开发环境可运行。
@@ -70,4 +82,6 @@
 
 ## 注意
 
-这套图片是“微缩小屋中的线索物件素材”，不是首页海报，也不是完整房间全景图。
+线索物件 prompt 必须强调 `single isolated 2.5D game prop asset`、45 度 top-front 视角、底部中心锚点、站在地板上、接地阴影、旧纸纸板材质、暖光、干净 cutout，并明确排除完整房间背景、扁平贴纸、icon、正面插画、文字、霓虹、赛博和写实商品照。
+
+房间壳背景 prompt 必须强调 `2.5D top-down mobile game room shell background`、纸板微缩房间、旧纸手账风、后墙/左右墙/暖色地板、窗户/灯/书架/桌子底座/植物、5 个线索物件空位、左上暖光、角落软阴影，并排除主线索物件、角色和可读文字。

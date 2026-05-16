@@ -95,8 +95,8 @@ export const roomNarrativeOutputSchema = z
 export const clueImagePromptObjectSchema = z
   .object({
     objectId: llmIdSchema,
-    prompt: shortText(1200),
-    negativePrompt: shortText(400)
+    prompt: shortText(1800),
+    negativePrompt: shortText(700)
   })
   .strict();
 
@@ -436,8 +436,8 @@ export const clueImagePromptJsonSchema = {
         required: ["objectId", "prompt", "negativePrompt"],
         properties: {
           objectId: { type: "string", pattern: "^[a-z][a-z0-9_-]*$" },
-          prompt: { type: "string", maxLength: 1200 },
-          negativePrompt: { type: "string", maxLength: 400 }
+          prompt: { type: "string", maxLength: 1800 },
+          negativePrompt: { type: "string", maxLength: 700 }
         }
       }
     }

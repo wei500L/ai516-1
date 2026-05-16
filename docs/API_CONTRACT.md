@@ -96,7 +96,7 @@ type StageAsset = {
     z?: number;
     layer?: number;
   };
-  anchor?: "bottom-center" | "center" | "top-left";
+  anchor?: { x: number; y: number } | "bottom-center" | "center" | "top-left";
   width: number;
   height: number;
   scale?: number;
@@ -110,6 +110,7 @@ type StageAsset = {
   publicTitle: string;
   visualTheme: string;
   renderTarget?: "2.5d_miniature_cabin";
+  camera?: "top_down_2_5d";
   stage?: {
     backgroundStyle: string;
     roomShellType: string;
@@ -134,7 +135,7 @@ type StageAsset = {
       z?: number;
       layer?: number;
     };
-    anchor?: "bottom-center" | "center" | "top-left";
+    anchor?: { x: 0.5; y: 1 } | "bottom-center" | "center" | "top-left";
     scale?: number;
     shadow?: {
       enabled: boolean;
@@ -150,7 +151,7 @@ type StageAsset = {
       height: number;
       style: string;
       interactive: true;
-      anchor?: "bottom-center" | "center" | "top-left";
+      anchor?: { x: 0.5; y: 1 } | "bottom-center" | "center" | "top-left";
       scale?: number;
       shadow?: {
         enabled: boolean;
@@ -180,6 +181,17 @@ type StageAsset = {
       y: number;
       z?: number;
       layer?: number;
+    };
+    anchor?: { x: 0.5; y: 1 } | "bottom-center";
+    scale?: number;
+    assetUrl?: string | null;
+    shadow?: {
+      enabled: boolean;
+      width: number;
+      height: number;
+      opacity: number;
+      blur: number;
+      offsetY: number;
     };
     chatEnabled?: true;
   };

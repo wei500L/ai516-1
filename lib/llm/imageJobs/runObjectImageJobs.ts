@@ -2,7 +2,11 @@ import type { LlmProvider } from "@/lib/llm/provider/types";
 import { normalizeImageResponse } from "@/lib/llm/imageJobs/normalizeImageResponse";
 import { downloadOrDecodeImage } from "@/lib/llm/imageJobs/downloadOrDecodeImage";
 import { storeGeneratedAsset } from "@/lib/llm/imageJobs/storeGeneratedAsset";
-import type { RoomAssetPlan } from "@/lib/llm/pipeline/types";
+import type {
+  ImageAssetRole,
+  ImageGenerationJob,
+  RoomAssetPlan
+} from "@/lib/llm/pipeline/types";
 
 type PromiseTask<T> = () => Promise<T>;
 
@@ -47,6 +51,7 @@ class PromiseLimiter {
 export type ObjectImageJobFailure = {
   objectId: string;
   objectName: string;
+  assetRole: ImageAssetRole;
   status: "failed";
   error: string;
   retryable: boolean;
@@ -59,6 +64,7 @@ export type ObjectImageJobFailure = {
 export type ObjectImageJobSuccess = {
   objectId: string;
   objectName: string;
+  assetRole: ImageAssetRole;
   status: "success";
   assetId: string;
   storagePath: string;
@@ -94,16 +100,18 @@ function isRetryableError(message: string) {
 
 async function generateSingleObjectImage(
   input: RunObjectImageJobsInput,
-  prompt: RoomAssetPlan["imagePromptPlan"]["objectImagePrompts"][number]
+  job: ImageGenerationJob
 ): Promise<ObjectImageJobResult> {
   const object = input.roomAssetPlan.roomDesign.objectConcepts.find(
-    (item) => item.id === prompt.objectId
+    (item) => item.id === job.objectId
   );
+  const objectName = object?.name ?? job.objectName;
 
-  if (!object) {
+  if (job.assetRole === "clue_object_sprite" && !object) {
     return {
-      objectId: prompt.objectId,
-      objectName: prompt.objectId,
+      objectId: job.objectId,
+      objectName,
+      assetRole: job.assetRole,
       status: "failed",
       error: "OBJECT_PROMPT_NOT_FOUND",
       retryable: false,
@@ -116,8 +124,8 @@ async function generateSingleObjectImage(
 
   try {
     const generated = await input.provider.imageGeneration({
-      prompt: prompt.positivePrompt,
-      size: prompt.size
+      prompt: job.prompt,
+      size: job.size
     });
     const normalized =
       generated.images.length > 0
@@ -130,9 +138,10 @@ async function generateSingleObjectImage(
     const stored = await storeGeneratedAsset({
       roomId: input.roomId,
       creatorId: input.creatorId,
-      objectId: object.id,
-      objectName: object.name,
-      promptText: prompt.positivePrompt,
+      objectId: job.objectId,
+      objectName,
+      assetRole: job.assetRole,
+      promptText: job.prompt,
       sourceType: decoded.sourceType,
       buffer: decoded.buffer,
       mimeType: decoded.mimeType,
@@ -142,8 +151,9 @@ async function generateSingleObjectImage(
     });
 
     return {
-      objectId: object.id,
-      objectName: object.name,
+      objectId: job.objectId,
+      objectName,
+      assetRole: job.assetRole,
       status: "success",
       assetId: stored.assetId,
       storagePath: stored.storagePath,
@@ -155,8 +165,9 @@ async function generateSingleObjectImage(
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     return {
-      objectId: object.id,
-      objectName: object.name,
+      objectId: job.objectId,
+      objectName,
+      assetRole: job.assetRole,
       status: "failed",
       error: errorMessage,
       retryable: isRetryableError(errorMessage),
@@ -171,13 +182,13 @@ async function generateSingleObjectImage(
 export async function runObjectImageJobs(
   input: RunObjectImageJobsInput
 ): Promise<RunObjectImageJobsOutput> {
-  const prompts = input.roomAssetPlan.imagePromptPlan.objectImagePrompts;
+  const jobs = input.roomAssetPlan.generationPlan.jobs;
   const limiter = new PromiseLimiter(
     input.provider.config.maxConcurrentImageJobs
   );
   const results = await Promise.all(
-    prompts.map((prompt) =>
-      limiter.run(() => generateSingleObjectImage(input, prompt))
+    jobs.map((job) =>
+      limiter.run(() => generateSingleObjectImage(input, job))
     )
   );
   const successCount = results.filter(

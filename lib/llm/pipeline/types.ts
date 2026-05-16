@@ -109,20 +109,62 @@ export const objectImagePromptSchema = z
   })
   .strict();
 
+export const roomShellBackgroundPromptSchema = z
+  .object({
+    positivePrompt: shortText(1600),
+    negativePrompt: optionalText(600),
+    size: z.enum(["512x512", "768x768", "1024x1024"]),
+    styleTags: z.array(shortText(40)).min(6).max(18),
+    renderIntent: shortText(220)
+  })
+  .strict();
+
+export const petSpritePromptSchema = z
+  .object({
+    petType: z.enum(["cat", "dog"]),
+    positivePrompt: shortText(1400),
+    negativePrompt: optionalText(600),
+    size: z.enum(["512x512", "768x768", "1024x1024"]),
+    styleTags: z.array(shortText(40)).min(6).max(18),
+    renderIntent: shortText(220)
+  })
+  .strict();
+
+export const foregroundOccluderPromptSchema = z
+  .object({
+    positivePrompt: shortText(1400),
+    negativePrompt: optionalText(600),
+    size: z.enum(["512x512", "768x768", "1024x1024"]),
+    styleTags: z.array(shortText(40)).min(6).max(18),
+    renderIntent: shortText(220)
+  })
+  .strict();
+
 export const imagePromptPlanSchema = z
   .object({
+    roomShellBackgroundPrompt: roomShellBackgroundPromptSchema,
     objectImagePrompts: z.array(objectImagePromptSchema).length(5),
+    petSpritePrompt: petSpritePromptSchema,
+    foregroundOccluderPrompt: foregroundOccluderPromptSchema,
     sharedStylePrompt: shortText(800)
   })
   .strict();
+
+export const imageAssetRoleSchema = z.enum([
+  "room_shell_background",
+  "clue_object_sprite",
+  "pet_sprite",
+  "foreground_occluder"
+]);
 
 export const imageGenerationJobSchema = z
   .object({
     jobId: pipelineIdSchema,
     objectId: pipelineIdSchema,
     objectName: shortText(32),
-    prompt: shortText(1800),
-    negativePrompt: optionalText(500),
+    assetRole: imageAssetRoleSchema,
+    prompt: shortText(3000),
+    negativePrompt: optionalText(700),
     size: z.enum(["512x512", "768x768", "1024x1024"]),
     providerMode: z.enum(["images_api", "chat_completions_image_model"]),
     responseFormat: z.enum(["url", "b64_json", "auto"])
@@ -137,7 +179,7 @@ export const roomAssetPlanSchema = z
     generationPlan: z
       .object({
         maxConcurrentImageJobs: z.number().int().min(1).max(12),
-        jobs: z.array(imageGenerationJobSchema).length(5)
+        jobs: z.array(imageGenerationJobSchema).length(8)
       })
       .strict()
   })
@@ -148,7 +190,15 @@ export type SemanticAnalysis = z.infer<typeof semanticAnalysisSchema>;
 export type ObjectConcept = z.infer<typeof objectConceptSchema>;
 export type RoomDesign = z.infer<typeof roomDesignSchema>;
 export type ObjectImagePrompt = z.infer<typeof objectImagePromptSchema>;
+export type RoomShellBackgroundPrompt = z.infer<
+  typeof roomShellBackgroundPromptSchema
+>;
+export type PetSpritePrompt = z.infer<typeof petSpritePromptSchema>;
+export type ForegroundOccluderPrompt = z.infer<
+  typeof foregroundOccluderPromptSchema
+>;
 export type ImagePromptPlan = z.infer<typeof imagePromptPlanSchema>;
+export type ImageAssetRole = z.infer<typeof imageAssetRoleSchema>;
 export type ImageGenerationJob = z.infer<typeof imageGenerationJobSchema>;
 export type RoomAssetPlan = z.infer<typeof roomAssetPlanSchema>;
 
@@ -301,8 +351,39 @@ export const roomDesignJsonSchema = {
 export const imagePromptPlanJsonSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["objectImagePrompts", "sharedStylePrompt"],
+  required: [
+    "roomShellBackgroundPrompt",
+    "objectImagePrompts",
+    "petSpritePrompt",
+    "foregroundOccluderPrompt",
+    "sharedStylePrompt"
+  ],
   properties: {
+    roomShellBackgroundPrompt: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "positivePrompt",
+        "size",
+        "styleTags",
+        "renderIntent"
+      ],
+      properties: {
+        positivePrompt: { type: "string", maxLength: 1600 },
+        negativePrompt: { type: ["string", "null"], maxLength: 600 },
+        size: {
+          type: "string",
+          enum: ["512x512", "768x768", "1024x1024"]
+        },
+        styleTags: {
+          type: "array",
+          minItems: 6,
+          maxItems: 18,
+          items: { type: "string", maxLength: 40 }
+        },
+        renderIntent: { type: "string", maxLength: 220 }
+      }
+    },
     objectImagePrompts: {
       type: "array",
       minItems: 5,
@@ -333,6 +414,58 @@ export const imagePromptPlanJsonSchema = {
           },
           renderIntent: { type: "string", maxLength: 220 }
         }
+      }
+    },
+    petSpritePrompt: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "petType",
+        "positivePrompt",
+        "size",
+        "styleTags",
+        "renderIntent"
+      ],
+      properties: {
+        petType: { type: "string", enum: ["cat", "dog"] },
+        positivePrompt: { type: "string", maxLength: 1400 },
+        negativePrompt: { type: ["string", "null"], maxLength: 600 },
+        size: {
+          type: "string",
+          enum: ["512x512", "768x768", "1024x1024"]
+        },
+        styleTags: {
+          type: "array",
+          minItems: 6,
+          maxItems: 18,
+          items: { type: "string", maxLength: 40 }
+        },
+        renderIntent: { type: "string", maxLength: 220 }
+      }
+    },
+    foregroundOccluderPrompt: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "positivePrompt",
+        "size",
+        "styleTags",
+        "renderIntent"
+      ],
+      properties: {
+        positivePrompt: { type: "string", maxLength: 1400 },
+        negativePrompt: { type: ["string", "null"], maxLength: 600 },
+        size: {
+          type: "string",
+          enum: ["512x512", "768x768", "1024x1024"]
+        },
+        styleTags: {
+          type: "array",
+          minItems: 6,
+          maxItems: 18,
+          items: { type: "string", maxLength: 40 }
+        },
+        renderIntent: { type: "string", maxLength: 220 }
       }
     },
     sharedStylePrompt: { type: "string", maxLength: 800 }
