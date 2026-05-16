@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import { Moon, Sparkles, Star } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ClueNote } from "@/components/handbook/clue-note";
@@ -309,18 +309,19 @@ export function PixiMiniRoomStage({
     [room.objects]
   );
   const petZ = depthZ(room.pet.position.y, room.pet.position.layer);
-  const tilt = useTilt();
+  const stageRef = useRef<HTMLDivElement>(null);
+  const tilt = useTilt({ targetRef: stageRef });
 
   return (
-    <div className="relative h-full overflow-visible" aria-label="线索小屋舞台">
-      <div className="absolute inset-0" style={parallaxStyle(tilt, 4)}>
+    <div ref={stageRef} className="relative h-full overflow-visible" aria-label="线索小屋舞台">
+      <div className="absolute inset-0" style={parallaxStyle(tilt, 3)}>
         <BackgroundLayer room={room} />
         <BackWallLayer room={room} />
       </div>
-      <div className="absolute inset-0" style={parallaxStyle(tilt, 7)}>
+      <div className="absolute inset-0" style={parallaxStyle(tilt, 10)}>
         <FurnitureLayer room={room} />
       </div>
-      <div className="absolute inset-0 z-30" style={parallaxStyle(tilt, 8)}>
+      <div className="absolute inset-0 z-30" style={parallaxStyle(tilt, 16)}>
         {sortedObjects.map((object) => (
           <RoomObjectSprite
             key={object.id}
@@ -334,7 +335,7 @@ export function PixiMiniRoomStage({
         ))}
         <PetSprite pet={room.pet} zIndex={petZ} onSelect={onSelectPet} />
       </div>
-      <div className="pointer-events-none absolute inset-0 z-40" style={parallaxStyle(tilt, 12)}>
+      <div className="pointer-events-none absolute inset-0 z-40" style={parallaxStyle(tilt, 24)}>
         {room.stage.foreground.map((asset) => (
           <OccluderAsset key={asset.id} asset={asset} />
         ))}
@@ -384,16 +385,6 @@ export function LayeredMiniRoom({ room }: LayeredMiniRoomProps) {
       <section
         className="relative mt-7 h-[500px]"
         aria-label="线索小屋"
-        style={
-          {
-            "--room-light-x": "58%",
-            "--room-light-y": "16%",
-            "--room-shadow-x": "-6px",
-            "--room-shadow-y": "10px",
-            "--room-shadow-blur": "9px",
-            "--room-shadow-color": "rgba(45, 27, 15, 0.28)"
-          } as CSSProperties
-        }
       >
         <PixiMiniRoomStage
           room={room}

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type RefObject } from "react";
 
 type UseTiltOptions = {
   disabled?: boolean;
   maxDeviceTilt?: number;
+  targetRef?: RefObject<HTMLElement | null>;
 };
 
 type TiltVector = {
@@ -25,7 +26,8 @@ function prefersReducedMotion() {
 
 export function useTilt({
   disabled = false,
-  maxDeviceTilt = 18
+  maxDeviceTilt = 18,
+  targetRef
 }: UseTiltOptions = {}): TiltVector {
   const [tilt, setTilt] = useState<TiltVector>(ZERO_TILT);
 
@@ -35,15 +37,24 @@ export function useTilt({
       return;
     }
 
+    const target = targetRef?.current ?? null;
+
     function updateFromPointer(event: PointerEvent) {
-      const x = (event.clientX / window.innerWidth - 0.5) * 2;
-      const y = (event.clientY / window.innerHeight - 0.5) * 2;
+      const rect = target?.getBoundingClientRect();
+      const cx = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+      const cy = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+      const w = rect ? rect.width / 2 : window.innerWidth / 2;
+      const h = rect ? rect.height / 2 : window.innerHeight / 2;
 
       setTilt({
-        x: clamp(x, -1, 1),
-        y: clamp(y, -1, 1),
+        x: clamp((event.clientX - cx) / w, -1, 1),
+        y: clamp((event.clientY - cy) / h, -1, 1),
         active: true
       });
+    }
+
+    function resetTilt() {
+      setTilt(ZERO_TILT);
     }
 
     function updateFromDevice(event: DeviceOrientationEvent) {
@@ -58,14 +69,23 @@ export function useTilt({
       });
     }
 
-    window.addEventListener("pointermove", updateFromPointer, { passive: true });
+    const pointerHost: HTMLElement | Window = target ?? window;
+    pointerHost.addEventListener("pointermove", updateFromPointer as EventListener, {
+      passive: true
+    });
+    if (target) {
+      target.addEventListener("pointerleave", resetTilt, { passive: true });
+    }
     window.addEventListener("deviceorientation", updateFromDevice, { passive: true });
 
     return () => {
-      window.removeEventListener("pointermove", updateFromPointer);
+      pointerHost.removeEventListener("pointermove", updateFromPointer as EventListener);
+      if (target) {
+        target.removeEventListener("pointerleave", resetTilt);
+      }
       window.removeEventListener("deviceorientation", updateFromDevice);
     };
-  }, [disabled, maxDeviceTilt]);
+  }, [disabled, maxDeviceTilt, targetRef]);
 
   return tilt;
 }

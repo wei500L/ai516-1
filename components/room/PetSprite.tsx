@@ -55,17 +55,18 @@ export function PetSprite({ pet, zIndex, onSelect }: PetSpriteProps) {
         <motion.span
           className="absolute left-1/2 top-full rounded-full bg-[#2d1b0f]"
           style={{
-            width: shadow.width * pet.scale * (raised ? 1.18 : 1),
-            height: shadow.height * pet.scale * (raised ? 1.08 : 1),
-            filter: `blur(${shadow.blur + (raised ? 2 : 0)}px)`
+            width: shadow.width * pet.scale,
+            height: shadow.height * pet.scale
           }}
           animate={{
             opacity: raised ? Math.min(0.22, shadow.opacity * 0.72) : shadow.opacity,
             x: "-50%",
             y: shadow.offsetY + (raised ? 4 : 0),
-            scaleX: raised ? 1.28 : 1.16
+            scaleX: raised ? 1.28 : 1.16,
+            scaleY: raised ? 1.08 : 1,
+            filter: `blur(${shadow.blur + (raised ? 2 : 0)}px)`
           }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
         />
       ) : null}
       <span className="absolute left-1/2 top-[58%] h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ffd985]/18 opacity-0 blur-[1px] shadow-[0_0_24px_rgba(255,211,120,0.86)] transition group-hover:opacity-100 group-focus-visible:opacity-100" />

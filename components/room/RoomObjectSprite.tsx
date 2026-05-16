@@ -91,19 +91,20 @@ export function RoomObjectSprite({
     >
       {shadow.enabled ? (
         <motion.span
-          className="pointer-events-none absolute left-1/2 top-full rounded-full bg-[#2d1b0f] transition-opacity"
+          className="pointer-events-none absolute left-1/2 top-full rounded-full bg-[#2d1b0f]"
           style={{
-            width: shadow.width * scale * (isRaised ? 1.18 : 1),
-            height: shadow.height * scale * (isRaised ? 1.08 : 1),
-            filter: `blur(${shadow.blur + (isRaised ? 2 : 0)}px)`
+            width: shadow.width * scale,
+            height: shadow.height * scale
           }}
           animate={{
             opacity: isRaised ? Math.min(0.22, shadow.opacity * 0.72) : shadow.opacity,
             x: "-50%",
             y: shadow.offsetY + (isRaised ? 4 : 0),
-            scaleX: 1.08 + object.position.y / 360 + (isRaised ? 0.12 : 0)
+            scaleX: 1.08 + object.position.y / 360 + (isRaised ? 0.18 : 0),
+            scaleY: isRaised ? 1.1 : 1,
+            filter: `blur(${shadow.blur + (isRaised ? 2 : 0)}px)`
           }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
         />
       ) : null}
 
