@@ -53,25 +53,104 @@ export async function getRoomPlayService(
   return {
     roomId,
     publicTitle: "朋友的心事小屋",
-    visualTheme: "paper_cabin",
+    visualTheme: "warm_notebook_cabin",
+    renderTarget: "2.5d_miniature_cabin",
+    stage: {
+      backgroundStyle: "warm-notebook-paper-with-pencil-shadow",
+      roomShellType: "open-front-paper-cabin",
+      lighting: "honey-colored-window-glow",
+      floorStyle: "lined-notebook-woodgrain-floor"
+    },
     objects: [
       {
         id: "envelope",
+        name: "未寄出的信",
+        clue: "它知道地址，却一直没有出发。",
+        keyword: "没说出口",
         title: "未寄出的信",
         description: "它知道地址，却一直没有出发。",
-        discovered: false
+        discovered: false,
+        position: { x: 50, y: 76, z: 8, layer: 42 },
+        render: {
+          assetUrl: "",
+          width: 148,
+          height: 116,
+          style: "foreground-paper-cutout-prop-long-shadow",
+          interactive: true
+        },
+        interactionType: "tap_note"
       },
       {
         id: "clock",
+        name: "停住的钟",
+        clue: "时间在某个名字附近慢下来。",
+        keyword: "等待",
         title: "停住的钟",
         description: "时间在某个名字附近慢下来。",
-        discovered: false
+        discovered: false,
+        position: { x: 26, y: 36, z: 28, layer: 18 },
+        render: {
+          assetUrl: "",
+          width: 116,
+          height: 116,
+          style: "flat-wall-paper-sticker-with-tape-shadow",
+          interactive: true
+        },
+        interactionType: "tap_reveal"
       },
       {
         id: "window",
+        name: "月亮窗",
+        clue: "窗边有一束很轻的光。",
+        keyword: "偷偷关注",
         title: "月亮窗",
         description: "窗边有一束很轻的光。",
-        discovered: false
+        discovered: false,
+        position: { x: 74, y: 38, z: 28, layer: 22 },
+        render: {
+          assetUrl: "",
+          width: 118,
+          height: 132,
+          style: "paper-cutout-window-side-prop-soft-backlight",
+          interactive: true
+        },
+        interactionType: "tap_note"
+      },
+      {
+        id: "plant",
+        name: "窗边植物",
+        clue: "它被照顾得很好，却不敢搬到阳光正中。",
+        keyword: "小心翼翼",
+        title: "窗边植物",
+        description: "它被照顾得很好，却不敢搬到阳光正中。",
+        discovered: false,
+        position: { x: 23, y: 60, z: 18, layer: 34 },
+        render: {
+          assetUrl: "",
+          width: 112,
+          height: 138,
+          style: "paper-cutout-shelf-side-prop-ambient-shadow",
+          interactive: true
+        },
+        interactionType: "tap"
+      },
+      {
+        id: "chat_note",
+        name: "墙上的便签",
+        clue: "上面只有几个点，像一句没有发出去的话。",
+        keyword: "犹豫",
+        title: "墙上的便签",
+        description: "上面只有几个点，像一句没有发出去的话。",
+        discovered: false,
+        position: { x: 83, y: 58, z: 18, layer: 36 },
+        render: {
+          assetUrl: "",
+          width: 124,
+          height: 104,
+          style: "flat-wall-paper-sticker-with-tape-shadow",
+          interactive: true
+        },
+        interactionType: "tap_reveal"
       }
     ],
     imageClue: null,
@@ -79,13 +158,34 @@ export async function getRoomPlayService(
       name: "纸团",
       avatarUrl: null,
       mood: "curious",
-      maxHintLevel: 3
+      maxHintLevel: 3,
+      type: "cat",
+      position: { x: 84, y: 80, z: 8, layer: 50 },
+      chatEnabled: true
     },
+    choices: [
+      {
+        index: 0,
+        label: "这像是一句想念，却不敢先开口。"
+      },
+      {
+        index: 1,
+        label: "这像是对未来的普通担心。"
+      },
+      {
+        index: 2,
+        label: "这像是在庆祝一件小事。"
+      },
+      {
+        index: 3,
+        label: "这像是一次轻松的吐槽。"
+      }
+    ],
     progress: {
       discoveredObjectIds: [],
       currentStep: "explore",
       hintLevelUsed: 0
-    }
+    },
   };
 }
 

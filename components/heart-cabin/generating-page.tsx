@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronRight, Heart, House, KeyRound } from "lucide-react";
+import { ArrowLeft, ChevronRight, Heart, House, KeyRound, Paintbrush, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { HanddrawnIconButton } from "@/components/handbook/handdrawn-icon-button";
 import { PaperButton } from "@/components/handbook/paper-button";
@@ -12,12 +12,36 @@ import { AppShell } from "@/components/layout/app-shell";
 import { PaperPage } from "@/components/layout/paper-page";
 import { MiniDoor } from "@/components/heart-cabin/decorations";
 import { useCreateRoomDraft } from "@/lib/use-create-room-draft";
+import { cn } from "@/lib/utils";
 
 export function GeneratingPage() {
   const router = useRouter();
   const { draft, resetDraft } = useCreateRoomDraft();
   const [error, setError] = useState<string | null>(null);
+  const [stageIndex, setStageIndex] = useState(0);
   const startedRef = useRef(false);
+  const stages = [
+    {
+      label: "正在读懂这句话",
+      detail: "先把情绪轻轻拆开",
+      icon: <Heart className="h-8 w-8 text-brick-red" />
+    },
+    {
+      label: "正在设计线索小屋",
+      detail: "把暗号放进桌边和窗边",
+      icon: <House className="h-8 w-8 text-sage" />
+    },
+    {
+      label: "正在绘制线索物件",
+      detail: "一张张做成纸片素材",
+      icon: <Paintbrush className="h-8 w-8 text-warm-orange" />
+    },
+    {
+      label: "正在摆进小屋",
+      detail: "调整层级、光影和位置",
+      icon: <KeyRound className="h-8 w-8 text-coffee/70" />
+    }
+  ];
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -64,6 +88,18 @@ export function GeneratingPage() {
     });
   }, [draft.moodTags, draft.sentence, resetDraft, router]);
 
+  useEffect(() => {
+    if (error) return;
+
+    const timers = [1600, 4200, 8200].map((delay, index) =>
+      window.setTimeout(() => setStageIndex(index + 1), delay)
+    );
+
+    return () => {
+      timers.forEach(window.clearTimeout);
+    };
+  }, [error]);
+
   return (
     <AppShell>
       <PaperPage className="pt-16">
@@ -95,25 +131,32 @@ export function GeneratingPage() {
           <MiniDoor className="absolute bottom-8 left-1/2 -translate-x-1/2" />
         </section>
 
-        <div className="mt-2 grid grid-cols-3 gap-3">
-          {[
-            ["1", "读懂这句话的情绪", <Heart key="h" className="h-10 w-10 text-brick-red" />],
-            ["2", "变成 5 个线索物件", <KeyRound key="k" className="h-10 w-10 text-coffee/70" />],
-            ["3", "搭好一间秘密小屋", <House key="r" className="h-10 w-10 text-sage" />]
-          ].map(([index, label, icon]) => (
-            <TornPaperCard key={String(index)} className="min-h-32 p-3 text-center" tape="top">
+        <div className="mt-2 grid grid-cols-2 gap-3">
+          {stages.map((stage, index) => (
+            <TornPaperCard
+              key={stage.label}
+              className={cn(
+                "min-h-32 p-3 text-center transition",
+                index <= stageIndex ? "bg-cream" : "opacity-58"
+              )}
+              tape="top"
+            >
               <span className="mb-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-sage text-sm text-cream">
-                {index}
+                {index + 1}
               </span>
-              <div className="mx-auto mb-2 flex justify-center">{icon}</div>
-              <p className="font-serif text-base leading-6">{label}</p>
+              <div className="mx-auto mb-2 flex justify-center">{stage.icon}</div>
+              <p className="font-serif text-base leading-6">{stage.label}</p>
+              <p className="mt-1 font-serif text-xs leading-5 text-coffee/56">{stage.detail}</p>
             </TornPaperCard>
           ))}
         </div>
 
         <section className="mt-7">
-          <p className="mb-4 font-serif text-xl">线索正在生成</p>
-          <ProgressStickers total={5} current={3} />
+          <p className="mb-4 flex items-center gap-2 font-serif text-xl">
+            <Sparkles className="h-5 w-5 text-warm-orange" />
+            {stages[stageIndex]?.label ?? "正在摆进小屋"}
+          </p>
+          <ProgressStickers total={4} current={error ? stageIndex : stageIndex + 1} />
         </section>
 
         <TornPaperCard tone="cream" className="mt-8 text-center font-serif text-xl" tape="corner">
