@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import { Moon, Sparkles, Star } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ClueNote } from "@/components/handbook/clue-note";
 import { PolaroidCard } from "@/components/handbook/polaroid-card";
 import { ProgressStickers } from "@/components/handbook/progress-stickers";
 import { TornPaperCard } from "@/components/handbook/torn-paper-card";
 import { PetSprite } from "@/components/room/PetSprite";
 import { RoomObjectSprite } from "@/components/room/RoomObjectSprite";
+import { useTilt } from "@/lib/hooks/useTilt";
 import type {
   AdaptedPublicRoom,
   MiniRoomObject,
@@ -64,6 +65,14 @@ function stagePalette(theme: string): StagePalette {
 
 function depthZ(y: number, layer?: number) {
   return Math.round(y * 10 + (layer ?? 0));
+}
+
+function parallaxStyle(tilt: { x: number; y: number }, amount: number): CSSProperties {
+  return {
+    transform: `translate3d(${(tilt.x * amount).toFixed(2)}px, ${(tilt.y * amount).toFixed(2)}px, 0)`,
+    transition: "transform 140ms ease-out",
+    willChange: "transform"
+  };
 }
 
 function fallbackDiscovered(progressIds: Set<string>, object: MiniRoomObject) {
@@ -151,6 +160,13 @@ function BackWallLayer({ room }: { room: AdaptedPublicRoom }) {
 
 function FurnitureLayer({ room }: { room: AdaptedPublicRoom }) {
   const colors = stagePalette(room.visualTheme);
+  const reduceMotion = useReducedMotion();
+  const lightPulse = reduceMotion
+    ? undefined
+    : {
+        opacity: [0.9, 1, 0.92],
+        scale: [0.99, 1.03, 1]
+      };
 
   return (
     <div className={cn("absolute inset-0 z-20 pointer-events-none", room.stage.backgroundAsset?.assetUrl && "opacity-0")}>
@@ -162,12 +178,22 @@ function FurnitureLayer({ room }: { room: AdaptedPublicRoom }) {
         className="absolute right-[13%] top-[22%] h-[24%] w-[23%] border-[5px] shadow-insetPaper"
         style={{ borderColor: "#6e4427", background: colors.window }}
       >
-        <Moon className="absolute left-[36%] top-[14%] h-9 w-9 text-[#ffd976]" />
+        <motion.div
+          className="absolute left-[36%] top-[14%]"
+          animate={lightPulse}
+          transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Moon className="h-9 w-9 text-[#ffd976]" />
+        </motion.div>
         <Star className="absolute bottom-5 right-4 h-5 w-5 text-[#ffd976]" />
         <div className="absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 bg-[#6e4427]" />
         <div className="absolute left-0 top-1/2 h-1 w-full -translate-y-1/2 bg-[#6e4427]" />
       </div>
-      <div className="absolute left-1/2 top-[16%] h-12 w-12 -translate-x-1/2 rounded-full bg-[#ffd470] shadow-[0_0_34px_rgba(255,205,96,0.95)]" />
+      <motion.div
+        className="absolute left-1/2 top-[16%] h-12 w-12 -translate-x-1/2 rounded-full bg-[#ffd470] shadow-[0_0_34px_rgba(255,205,96,0.95)]"
+        animate={lightPulse}
+        transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+      />
       <div className="absolute left-1/2 top-[16%] h-[28%] w-px -translate-x-1/2 bg-[#4b2b18]/60" />
       <div
         className="absolute left-1/2 top-[43%] h-[14%] w-[44%] -translate-x-1/2 rounded-[3px] shadow-sticker"
@@ -249,14 +275,20 @@ function OccluderAsset({ asset }: { asset: MiniRoomStageAsset }) {
 function EffectLayer() {
   return (
     <div className="pointer-events-none absolute inset-0 z-[7000]">
-      <div className="absolute left-1/2 top-[21%] h-40 w-40 -translate-x-1/2 rounded-full bg-[#ffd470]/18 blur-2xl" />
+      <div
+        className="absolute h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ffd470]/18 blur-2xl"
+        style={{
+          left: "var(--room-light-x)",
+          top: "var(--room-light-y)"
+        }}
+      />
       <div className="absolute inset-x-[7%] bottom-[2%] h-20 bg-gradient-to-t from-[#2d1b0f]/22 to-transparent" />
       <div className="absolute inset-[3%] rounded-[2px] shadow-[inset_0_0_38px_rgba(62,35,18,0.22)]" />
     </div>
   );
 }
 
-export function PixiMiniRoomStage({
+export function LayeredMiniRoomStage({
   room,
   selectedObject,
   discoveredIds,
@@ -277,13 +309,23 @@ export function PixiMiniRoomStage({
     [room.objects]
   );
   const petZ = depthZ(room.pet.position.y, room.pet.position.layer);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const tilt = useTilt({ targetRef: stageRef });
 
   return (
-    <div className="relative h-full overflow-visible" aria-label="线索小屋舞台">
-      <BackgroundLayer room={room} />
-      <BackWallLayer room={room} />
-      <FurnitureLayer room={room} />
-      <div className="absolute inset-0 z-30">
+    <div
+      ref={stageRef}
+      className="relative h-full overflow-hidden"
+      aria-label="线索小屋舞台"
+    >
+      <div className="absolute inset-0" style={parallaxStyle(tilt, 3)}>
+        <BackgroundLayer room={room} />
+        <BackWallLayer room={room} />
+      </div>
+      <div className="absolute inset-0" style={parallaxStyle(tilt, 10)}>
+        <FurnitureLayer room={room} />
+      </div>
+      <div className="absolute inset-0 z-30" style={parallaxStyle(tilt, 16)}>
         {sortedObjects.map((object) => (
           <RoomObjectSprite
             key={object.id}
@@ -297,7 +339,7 @@ export function PixiMiniRoomStage({
         ))}
         <PetSprite pet={room.pet} zIndex={petZ} onSelect={onSelectPet} />
       </div>
-      <div className="pointer-events-none absolute inset-0 z-40">
+      <div className="pointer-events-none absolute inset-0 z-40" style={parallaxStyle(tilt, 24)}>
         {room.stage.foreground.map((asset) => (
           <OccluderAsset key={asset.id} asset={asset} />
         ))}
@@ -344,8 +386,11 @@ export function LayeredMiniRoom({ room }: LayeredMiniRoomProps) {
         </PolaroidCard>
       ) : null}
 
-      <section className="relative mt-7 h-[500px]" aria-label="线索小屋">
-        <PixiMiniRoomStage
+      <section
+        className="relative mt-7 h-[500px]"
+        aria-label="线索小屋"
+      >
+        <LayeredMiniRoomStage
           room={room}
           selectedObject={selectedObject}
           discoveredIds={discoveredIds}
