@@ -85,6 +85,26 @@ Response `201`:
 Response `200`:
 
 ```ts
+type StageAsset = {
+  id: string;
+  kind: string;
+  assetUrl?: string;
+  alt?: string;
+  position: {
+    x: number;
+    y: number;
+    z?: number;
+    layer?: number;
+  };
+  anchor?: "bottom-center" | "center" | "top-left";
+  width: number;
+  height: number;
+  scale?: number;
+  opacity?: number;
+  layer?: number;
+  style?: string;
+};
+
 {
   roomId: string;
   publicTitle: string;
@@ -95,6 +115,8 @@ Response `200`:
     roomShellType: string;
     lighting: string;
     floorStyle: string;
+    backgroundAsset?: StageAsset | null;
+    foreground?: StageAsset[];
   };
   objects: Array<{
     id: string;
@@ -105,11 +127,22 @@ Response `200`:
     description: string;
     discovered: boolean;
     imageUrl?: string | null;
+    assetUrl?: string | null;
     position?: {
       x: number;
       y: number;
       z?: number;
       layer?: number;
+    };
+    anchor?: "bottom-center" | "center" | "top-left";
+    scale?: number;
+    shadow?: {
+      enabled: boolean;
+      width: number;
+      height: number;
+      opacity: number;
+      blur: number;
+      offsetY: number;
     };
     render?: {
       assetUrl: string;
@@ -117,6 +150,16 @@ Response `200`:
       height: number;
       style: string;
       interactive: true;
+      anchor?: "bottom-center" | "center" | "top-left";
+      scale?: number;
+      shadow?: {
+        enabled: boolean;
+        width: number;
+        height: number;
+        opacity: number;
+        blur: number;
+        offsetY: number;
+      };
     };
     interactionType?: "tap" | "tap_note" | "tap_reveal";
   }>;

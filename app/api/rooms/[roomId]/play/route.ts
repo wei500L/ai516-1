@@ -28,7 +28,11 @@ type StoredRoomObject = {
   description?: unknown;
   clue?: unknown;
   imageUrl?: unknown;
+  assetUrl?: unknown;
   keyword?: unknown;
+  anchor?: unknown;
+  scale?: unknown;
+  shadow?: unknown;
   position?: unknown;
   render?: unknown;
   interactionType?: unknown;
@@ -67,8 +71,22 @@ function readRoomJsonObjects(roomJson: Json): GetRoomPlayResponse["objects"] {
         "这件物品还在等你靠近。"
       ),
       discovered: false,
+      ...(typeof object.assetUrl === "string" && object.assetUrl.trim().length > 0
+        ? { assetUrl: object.assetUrl }
+        : imageUrl
+        ? { assetUrl: imageUrl }
+        : {}),
       ...(typeof object.position === "object" && object.position
         ? { position: object.position as GetRoomPlayResponse["objects"][number]["position"] }
+        : {}),
+      ...(object.anchor === "bottom-center" ||
+      object.anchor === "center" ||
+      object.anchor === "top-left"
+        ? { anchor: object.anchor }
+        : {}),
+      ...(typeof object.scale === "number" ? { scale: object.scale } : {}),
+      ...(typeof object.shadow === "object" && object.shadow
+        ? { shadow: object.shadow as GetRoomPlayResponse["objects"][number]["shadow"] }
         : {}),
       ...(typeof object.render === "object" && object.render
         ? { render: object.render as GetRoomPlayResponse["objects"][number]["render"] }

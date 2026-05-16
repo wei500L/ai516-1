@@ -44,19 +44,54 @@ export const roomObjectPositionSchema = z.object({
   layer: z.number().optional()
 });
 
+export const roomObjectAnchorSchema = z.enum([
+  "bottom-center",
+  "center",
+  "top-left"
+]);
+
+export const roomObjectShadowSchema = z.object({
+  enabled: z.boolean(),
+  width: z.number(),
+  height: z.number(),
+  opacity: z.number(),
+  blur: z.number(),
+  offsetY: z.number()
+});
+
+export const roomStageAssetSchema = z.object({
+  id: idSchema,
+  kind: z.string(),
+  assetUrl: z.string().optional(),
+  alt: z.string().optional(),
+  position: roomObjectPositionSchema,
+  anchor: roomObjectAnchorSchema.optional(),
+  width: z.number(),
+  height: z.number(),
+  scale: z.number().optional(),
+  opacity: z.number().optional(),
+  layer: z.number().optional(),
+  style: z.string().optional()
+});
+
 export const roomObjectRenderSchema = z.object({
   assetUrl: z.string().min(0),
   width: z.number(),
   height: z.number(),
   style: z.string(),
-  interactive: z.literal(true)
+  interactive: z.literal(true),
+  anchor: roomObjectAnchorSchema.optional(),
+  scale: z.number().optional(),
+  shadow: roomObjectShadowSchema.optional()
 });
 
 export const publicRoomStageSchema = z.object({
   backgroundStyle: z.string(),
   roomShellType: z.string(),
   lighting: z.string(),
-  floorStyle: z.string()
+  floorStyle: z.string(),
+  backgroundAsset: roomStageAssetSchema.nullable().optional(),
+  foreground: z.array(roomStageAssetSchema).optional()
 });
 
 export const publicRoomObjectSchema = z.object({
@@ -68,7 +103,11 @@ export const publicRoomObjectSchema = z.object({
   description: z.string(),
   discovered: z.boolean(),
   imageUrl: z.string().nullable().optional(),
+  assetUrl: z.string().nullable().optional(),
   position: roomObjectPositionSchema.optional(),
+  anchor: roomObjectAnchorSchema.optional(),
+  scale: z.number().optional(),
+  shadow: roomObjectShadowSchema.optional(),
   render: roomObjectRenderSchema.optional(),
   interactionType: z.enum(["tap", "tap_note", "tap_reveal"]).optional()
 });

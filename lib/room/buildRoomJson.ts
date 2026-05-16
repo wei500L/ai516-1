@@ -9,8 +9,10 @@ import type {
 import {
   getLayoutForObject,
   getStageForTheme,
+  type RoomObjectAnchor,
   type RoomObjectPosition,
   type RoomObjectRender,
+  type RoomObjectShadow,
   type RoomStage
 } from "./layoutRules";
 
@@ -22,6 +24,10 @@ export type RoomJsonObject = {
   clue: string;
   keyword: string;
   position: RoomObjectPosition;
+  anchor: RoomObjectAnchor;
+  scale: number;
+  assetUrl: string;
+  shadow: RoomObjectShadow;
   render: RoomObjectRender;
   interactionType: RoomInteractionType;
 };
@@ -181,6 +187,20 @@ function getCorrectChoiceIndex(input: BuildRoomJsonInput) {
   return legacyIndex >= 0 ? legacyIndex : 0;
 }
 
+function buildObjectShadow(layout: ReturnType<typeof getLayoutForObject>): RoomObjectShadow {
+  const depth = typeof layout.position.z === "number" ? layout.position.z : 16;
+  const frontness = Math.max(0, Math.min(1, layout.position.y / 100));
+
+  return {
+    enabled: true,
+    width: Math.round(layout.render.width * (0.64 + frontness * 0.16)),
+    height: Math.round(18 + frontness * 10),
+    opacity: Number((0.2 + frontness * 0.18).toFixed(2)),
+    blur: Math.round(8 + Math.max(0, 34 - depth) * 0.14),
+    offsetY: Math.round(5 + frontness * 4)
+  };
+}
+
 function buildObjects(input: BuildRoomJsonInput): RoomJsonObject[] {
   const visualTheme =
     input.roomDesign?.visualTheme ?? input.room?.visualTheme ?? "old_paper_dollhouse";
@@ -204,6 +224,9 @@ function buildObjects(input: BuildRoomJsonInput): RoomJsonObject[] {
   return concepts.map((object, index) => {
     const layout = getLayoutForObject(object, index, visualTheme, usedSlotKeys);
     const assetUrl = assetByObjectId.get(object.id) ?? "";
+    const scale = Number((0.9 + Math.max(0, Math.min(100, layout.position.y)) / 520).toFixed(2));
+    const anchor = "bottom-center" as const;
+    const shadow = buildObjectShadow(layout);
 
     return {
       id: object.id || `object_${index + 1}`,
@@ -211,12 +234,19 @@ function buildObjects(input: BuildRoomJsonInput): RoomJsonObject[] {
       clue: object.clue,
       keyword: object.keyword,
       position: layout.position,
+      anchor,
+      scale,
+      assetUrl,
+      shadow,
       render: {
         assetUrl,
         width: layout.render.width,
         height: layout.render.height,
         style: layout.render.style,
-        interactive: true
+        interactive: true,
+        anchor,
+        scale,
+        shadow
       },
       interactionType: normalizeInteractionType(
         "interactionType" in object ? object.interactionType : undefined

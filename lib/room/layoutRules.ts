@@ -11,6 +11,41 @@ export type RoomStage = {
   roomShellType: string;
   lighting: string;
   floorStyle: string;
+  backgroundAsset?: RoomStageAsset | null;
+  foreground: RoomStageAsset[];
+};
+
+export type RoomObjectAnchor = "bottom-center" | "center" | "top-left";
+
+export type RoomObjectShadow = {
+  enabled: boolean;
+  width: number;
+  height: number;
+  opacity: number;
+  blur: number;
+  offsetY: number;
+};
+
+export type RoomStageAsset = {
+  id: string;
+  kind:
+    | "background"
+    | "table_front"
+    | "door_frame"
+    | "cardboard_edge"
+    | "rug_front"
+    | "paper_floor_lip"
+    | string;
+  assetUrl?: string;
+  alt?: string;
+  position: RoomObjectPosition;
+  anchor: RoomObjectAnchor;
+  width: number;
+  height: number;
+  scale: number;
+  opacity?: number;
+  layer?: number;
+  style?: string;
 };
 
 export type RoomObjectPosition = {
@@ -26,6 +61,9 @@ export type RoomObjectRender = {
   height: number;
   style: string;
   interactive: true;
+  anchor: RoomObjectAnchor;
+  scale: number;
+  shadow: RoomObjectShadow;
 };
 
 export type LayoutSlotKey =
@@ -43,36 +81,104 @@ export type LayoutSlot = {
   matchers: string[];
 };
 
+const DEFAULT_FOREGROUND: RoomStageAsset[] = [
+  {
+    id: "rug_front_edge",
+    kind: "rug_front",
+    position: { x: 50, y: 83, z: 2, layer: 4200 },
+    anchor: "bottom-center",
+    width: 278,
+    height: 44,
+    scale: 1,
+    opacity: 0.96,
+    style: "torn-paper-rug-front-edge"
+  },
+  {
+    id: "table_front_edge",
+    kind: "table_front",
+    position: { x: 50, y: 68, z: 7, layer: 3900 },
+    anchor: "bottom-center",
+    width: 218,
+    height: 58,
+    scale: 1,
+    opacity: 0.98,
+    style: "paper-table-front-occluder"
+  },
+  {
+    id: "left_cardboard_edge",
+    kind: "cardboard_edge",
+    position: { x: 4, y: 67, z: 4, layer: 5200 },
+    anchor: "bottom-center",
+    width: 46,
+    height: 330,
+    scale: 1,
+    opacity: 0.94,
+    style: "left-open-cardboard-wall-edge"
+  },
+  {
+    id: "right_cardboard_edge",
+    kind: "cardboard_edge",
+    position: { x: 96, y: 67, z: 4, layer: 5200 },
+    anchor: "bottom-center",
+    width: 46,
+    height: 330,
+    scale: 1,
+    opacity: 0.94,
+    style: "right-open-cardboard-wall-edge"
+  },
+  {
+    id: "front_floor_lip",
+    kind: "paper_floor_lip",
+    position: { x: 50, y: 96, z: 1, layer: 6100 },
+    anchor: "bottom-center",
+    width: 392,
+    height: 42,
+    scale: 1,
+    opacity: 1,
+    style: "corrugated-cardboard-front-lip"
+  }
+];
+
 export const STAGE_BY_THEME: Record<string, RoomStage> = {
   old_paper_dollhouse: {
     backgroundStyle: "aged-paper-backdrop-with-taped-corners",
     roomShellType: "open-front-cardboard-dollhouse",
     lighting: "soft-warm-desk-lamp",
-    floorStyle: "folded-kraft-paper-floor"
+    floorStyle: "folded-kraft-paper-floor",
+    backgroundAsset: null,
+    foreground: DEFAULT_FOREGROUND
   },
   warm_notebook_cabin: {
     backgroundStyle: "warm-notebook-paper-with-pencil-shadow",
     roomShellType: "open-front-paper-cabin",
     lighting: "honey-colored-window-glow",
-    floorStyle: "lined-notebook-woodgrain-floor"
+    floorStyle: "lined-notebook-woodgrain-floor",
+    backgroundAsset: null,
+    foreground: DEFAULT_FOREGROUND
   },
   rainy_desk_miniature: {
     backgroundStyle: "rainy-window-paper-diorama",
     roomShellType: "desk-corner-cardboard-room",
     lighting: "cool-rainy-light-with-small-warm-lamp",
-    floorStyle: "muted-blue-gray-paper-floor"
+    floorStyle: "muted-blue-gray-paper-floor",
+    backgroundAsset: null,
+    foreground: DEFAULT_FOREGROUND
   },
   moonlit_paper_room: {
     backgroundStyle: "moonlit-washi-paper-backdrop",
     roomShellType: "open-front-night-paper-room",
     lighting: "soft-moonlight-plus-tiny-warm-lantern",
-    floorStyle: "deep-indigo-paper-floor-with-cutout-shadows"
+    floorStyle: "deep-indigo-paper-floor-with-cutout-shadows",
+    backgroundAsset: null,
+    foreground: DEFAULT_FOREGROUND
   },
   pressed_flower_attic: {
     backgroundStyle: "pressed-flower-scrapbook-wall",
     roomShellType: "sloped-roof-paper-attic",
     lighting: "late-afternoon-amber-attic-light",
-    floorStyle: "pale-wood-paper-floor-with-flower-flecks"
+    floorStyle: "pale-wood-paper-floor-with-flower-flecks",
+    backgroundAsset: null,
+    foreground: DEFAULT_FOREGROUND
   }
 };
 

@@ -42,6 +42,7 @@ export function buildPublicRoomData(roomJson: RoomJson): PublicRoomData {
       title: object.name,
       description: object.clue,
       discovered: false,
+      assetUrl: object.assetUrl || object.render.assetUrl || "",
       imageUrl: object.render.assetUrl || null
     })),
     choices: roomJson.choices.map((choice, index) => ({
