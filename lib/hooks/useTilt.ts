@@ -15,13 +15,10 @@ type TiltVector = {
 };
 
 const ZERO_TILT: TiltVector = { x: 0, y: 0, active: false };
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
-}
-
-function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 export function useTilt({
@@ -30,14 +27,40 @@ export function useTilt({
   targetRef
 }: UseTiltOptions = {}): TiltVector {
   const [tilt, setTilt] = useState<TiltVector>(ZERO_TILT);
+  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
-    if (disabled || prefersReducedMotion()) {
+    const mq = window.matchMedia(REDUCED_MOTION_QUERY);
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (disabled || reduced) {
       setTilt(ZERO_TILT);
       return;
     }
 
     const target = targetRef?.current ?? null;
+    let rafId: number | null = null;
+    let nextTilt: TiltVector | null = null;
+
+    function flush() {
+      rafId = null;
+      if (nextTilt) {
+        setTilt(nextTilt);
+        nextTilt = null;
+      }
+    }
+
+    function schedule(value: TiltVector) {
+      nextTilt = value;
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(flush);
+      }
+    }
 
     function updateFromPointer(event: PointerEvent) {
       const rect = target?.getBoundingClientRect();
@@ -46,7 +69,7 @@ export function useTilt({
       const w = rect ? rect.width / 2 : window.innerWidth / 2;
       const h = rect ? rect.height / 2 : window.innerHeight / 2;
 
-      setTilt({
+      schedule({
         x: clamp((event.clientX - cx) / w, -1, 1),
         y: clamp((event.clientY - cy) / h, -1, 1),
         active: true
@@ -54,7 +77,7 @@ export function useTilt({
     }
 
     function resetTilt() {
-      setTilt(ZERO_TILT);
+      schedule(ZERO_TILT);
     }
 
     function updateFromDevice(event: DeviceOrientationEvent) {
@@ -62,7 +85,7 @@ export function useTilt({
         return;
       }
 
-      setTilt({
+      schedule({
         x: clamp(event.gamma / maxDeviceTilt, -1, 1),
         y: clamp(event.beta / maxDeviceTilt, -1, 1),
         active: true
@@ -84,8 +107,11 @@ export function useTilt({
         target.removeEventListener("pointerleave", resetTilt);
       }
       window.removeEventListener("deviceorientation", updateFromDevice);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
     };
-  }, [disabled, maxDeviceTilt, targetRef]);
+  }, [disabled, reduced, maxDeviceTilt, targetRef]);
 
   return tilt;
 }

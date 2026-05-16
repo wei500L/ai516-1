@@ -288,7 +288,7 @@ function EffectLayer() {
   );
 }
 
-export function PixiMiniRoomStage({
+export function LayeredMiniRoomStage({
   room,
   selectedObject,
   discoveredIds,
@@ -313,7 +313,11 @@ export function PixiMiniRoomStage({
   const tilt = useTilt({ targetRef: stageRef });
 
   return (
-    <div ref={stageRef} className="relative h-full overflow-visible" aria-label="线索小屋舞台">
+    <div
+      ref={stageRef}
+      className="relative h-full overflow-hidden"
+      aria-label="线索小屋舞台"
+    >
       <div className="absolute inset-0" style={parallaxStyle(tilt, 3)}>
         <BackgroundLayer room={room} />
         <BackWallLayer room={room} />
@@ -386,7 +390,7 @@ export function LayeredMiniRoom({ room }: LayeredMiniRoomProps) {
         className="relative mt-7 h-[500px]"
         aria-label="线索小屋"
       >
-        <PixiMiniRoomStage
+        <LayeredMiniRoomStage
           room={room}
           selectedObject={selectedObject}
           discoveredIds={discoveredIds}
