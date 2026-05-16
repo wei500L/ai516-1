@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 import {
   generateRoomFromSecretInputSchema,
   parseStructuredOutput,
@@ -23,6 +25,7 @@ import {
   persistGeneratedImage,
   type PersistedGeneratedImage
 } from "@/lib/ai/imageStorage";
+import { buildRoomJson } from "@/lib/room/buildRoomJson";
 
 const HEART_CABIN_STYLE = [
   "旧纸手账风",
@@ -225,7 +228,8 @@ export type GeneratedRoomPipelineResult = {
 export async function generateRoomWithImages(
   input: GenerateRoomFromSecretInput,
   client: StructuredLlmClient,
-  config: AiProviderConfig
+  config: AiProviderConfig,
+  roomId = `room_${crypto.randomUUID()}`
 ): Promise<GeneratedRoomPipelineResult> {
   const parsedInput = generateRoomFromSecretInputSchema.parse(input);
   const analysis = await analyzeSecret(parsedInput, client);
@@ -276,27 +280,21 @@ export async function generateRoomWithImages(
     hiddenMeaning: narrative.hiddenMeaning.trim(),
     objects
   };
-  const roomJson = {
-    schemaVersion: 1,
-    renderTarget: "2.5d_miniature_cabin",
-    style: HEART_CABIN_STYLE,
-    publicTitle: room.publicTitle,
-    visualTheme: room.visualTheme,
-    objects,
-    choices: room.choices.map((choice, index) => ({
-      index,
-      id: choice.id,
-      label: choice.text
-    })),
-    pet: room.pet,
-    endingLine: room.endingLine,
-    shareText: room.shareText,
+  const roomJson = buildRoomJson({
+    roomId,
+    originalSentence: parsedInput.sentence,
+    semanticAnalysis: {
+      coreEmotion: analysis.coreEmotion,
+      hiddenMeaning: room.hiddenMeaning,
+      implicitNeed: analysis.implicitNeed
+    },
+    room,
     generation: {
       imageGenerationMode: config.imageGenerationMode,
       chatModel: config.chatModel,
       imageModel: config.imageModel
     }
-  };
+  });
 
   return {
     room,
@@ -305,4 +303,3 @@ export async function generateRoomWithImages(
     imagePrompts
   };
 }
-

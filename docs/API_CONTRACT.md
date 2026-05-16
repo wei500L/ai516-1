@@ -89,12 +89,36 @@ Response `200`:
   roomId: string;
   publicTitle: string;
   visualTheme: string;
+  renderTarget?: "2.5d_miniature_cabin";
+  stage?: {
+    backgroundStyle: string;
+    roomShellType: string;
+    lighting: string;
+    floorStyle: string;
+  };
   objects: Array<{
     id: string;
+    name?: string;
+    clue?: string;
+    keyword?: string;
     title: string;
     description: string;
     discovered: boolean;
     imageUrl?: string | null;
+    position?: {
+      x: number;
+      y: number;
+      z?: number;
+      layer?: number;
+    };
+    render?: {
+      assetUrl: string;
+      width: number;
+      height: number;
+      style: string;
+      interactive: true;
+    };
+    interactionType?: "tap" | "tap_note" | "tap_reveal";
   }>;
   imageClue: {
     assetId: string;
@@ -107,6 +131,14 @@ Response `200`:
     avatarUrl: string | null;
     mood: string;
     maxHintLevel: 0 | 1 | 2 | 3;
+    type?: "cat" | "dog";
+    position?: {
+      x: number;
+      y: number;
+      z?: number;
+      layer?: number;
+    };
+    chatEnabled?: true;
   };
   choices?: Array<{
     index: number;

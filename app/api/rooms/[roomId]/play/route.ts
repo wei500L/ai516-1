@@ -2,6 +2,8 @@ import { apiError, jsonResponse } from "@/lib/api/http";
 import { getRoomPlayService } from "@/lib/api/mock-services";
 import type { GetRoomPlayResponse } from "@/lib/contracts/api";
 import type { Json } from "@/lib/database.types";
+import { buildPlayApiResponse } from "@/lib/room/buildPublicRoomData";
+import type { RoomJson } from "@/lib/room/buildRoomJson";
 import {
   getRoomPlayParamsSchema,
   getRoomPlayResponseSchema
@@ -26,6 +28,10 @@ type StoredRoomObject = {
   description?: unknown;
   clue?: unknown;
   imageUrl?: unknown;
+  keyword?: unknown;
+  position?: unknown;
+  render?: unknown;
+  interactionType?: unknown;
 };
 
 function asString(value: unknown, fallback: string) {
@@ -43,16 +49,35 @@ function readRoomJsonObjects(roomJson: Json): GetRoomPlayResponse["objects"] {
     const imageUrl =
       typeof object.imageUrl === "string" && object.imageUrl.trim().length > 0
         ? object.imageUrl
+        : asRecord((object.render ?? {}) as Json).assetUrl
+        ? String(asRecord((object.render ?? {}) as Json).assetUrl)
         : null;
 
     return {
       id: asString(object.id, `object_${index + 1}`),
+      name: asString(object.name ?? object.title, `线索 ${index + 1}`),
+      clue: asString(
+        object.clue ?? object.visualDescription ?? object.description,
+        "这件物品还在等你靠近。"
+      ),
+      keyword: asString(object.keyword, ""),
       title: asString(object.name ?? object.title, `线索 ${index + 1}`),
       description: asString(
         object.clue ?? object.visualDescription ?? object.description,
         "这件物品还在等你靠近。"
       ),
       discovered: false,
+      ...(typeof object.position === "object" && object.position
+        ? { position: object.position as GetRoomPlayResponse["objects"][number]["position"] }
+        : {}),
+      ...(typeof object.render === "object" && object.render
+        ? { render: object.render as GetRoomPlayResponse["objects"][number]["render"] }
+        : {}),
+      ...(object.interactionType === "tap" ||
+      object.interactionType === "tap_note" ||
+      object.interactionType === "tap_reveal"
+        ? { interactionType: object.interactionType }
+        : {}),
       ...(imageUrl ? { imageUrl } : {})
     };
   });
@@ -109,17 +134,35 @@ async function getPersistedRoomPlay(
   const roomJson = asRecord(room.room_json);
   const pet = asRecord((roomJson.pet ?? {}) as Json);
 
+  if (roomJson.schemaVersion === 1 && roomJson.renderTarget === "2.5d_miniature_cabin") {
+    return buildPlayApiResponse(roomJson as RoomJson);
+  }
+
   return {
     roomId: room.id,
     publicTitle: room.public_title,
     visualTheme: room.visual_theme,
+    ...(typeof roomJson.renderTarget === "string"
+      ? {
+          renderTarget:
+            roomJson.renderTarget as GetRoomPlayResponse["renderTarget"]
+        }
+      : {}),
+    ...(typeof roomJson.stage === "object" && roomJson.stage
+      ? { stage: roomJson.stage as GetRoomPlayResponse["stage"] }
+      : {}),
     objects: readRoomJsonObjects(room.room_json),
     imageClue: null,
     pet: {
       name: asString(pet.name, "纸团"),
       avatarUrl: null,
       mood: asString(pet.type, "curious"),
-      maxHintLevel: 3
+      maxHintLevel: 3,
+      ...(pet.type === "cat" || pet.type === "dog" ? { type: pet.type } : {}),
+      ...(typeof pet.position === "object" && pet.position
+        ? { position: pet.position as GetRoomPlayResponse["pet"]["position"] }
+        : {}),
+      ...(pet.chatEnabled === true ? { chatEnabled: true as const } : {})
     },
     choices: readChoices(room.room_json),
     progress: {

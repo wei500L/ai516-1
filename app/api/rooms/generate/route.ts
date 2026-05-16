@@ -20,6 +20,7 @@ import {
 async function persistGeneratedRoom(
   request: Request,
   input: {
+    roomId: string;
     sentence: string;
     visibility: "private" | "unlisted" | "public";
   },
@@ -31,7 +32,7 @@ async function persistGeneratedRoom(
 
   if (!supabaseConfig || !creatorId) {
     return {
-      roomId: `room_${crypto.randomUUID()}`,
+      roomId: input.roomId,
       createdAt
     };
   }
@@ -46,6 +47,7 @@ async function persistGeneratedRoom(
     {
       method: "POST",
       body: JSON.stringify({
+        id: input.roomId,
         creator_id: creatorId,
         original_sentence: input.sentence,
         hidden_meaning: generated.room.hiddenMeaning,
@@ -89,6 +91,7 @@ export async function POST(request: Request) {
 
   try {
     const llmClient = createOpenAiCompatibleStructuredClient(aiConfig);
+    const roomId = crypto.randomUUID();
     const generated = await generateRoomWithImages(
       {
         sentence: parsed.data.sentence,
@@ -100,11 +103,13 @@ export async function POST(request: Request) {
         creatorStylePreference: null
       },
       llmClient,
-      aiConfig
+      aiConfig,
+      roomId
     );
     const persisted = await persistGeneratedRoom(
       request,
       {
+        roomId,
         sentence: parsed.data.sentence,
         visibility: parsed.data.visibility
       },

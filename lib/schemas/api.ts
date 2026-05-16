@@ -37,26 +37,57 @@ export const diaryEntryTypeSchema = z.enum([
   "manual_note"
 ]);
 
+export const roomObjectPositionSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  z: z.number().optional(),
+  layer: z.number().optional()
+});
+
+export const roomObjectRenderSchema = z.object({
+  assetUrl: z.string().min(0),
+  width: z.number(),
+  height: z.number(),
+  style: z.string(),
+  interactive: z.literal(true)
+});
+
+export const publicRoomStageSchema = z.object({
+  backgroundStyle: z.string(),
+  roomShellType: z.string(),
+  lighting: z.string(),
+  floorStyle: z.string()
+});
+
 export const publicRoomObjectSchema = z.object({
   id: idSchema,
+  name: z.string().optional(),
+  clue: z.string().optional(),
+  keyword: z.string().optional(),
   title: z.string(),
   description: z.string(),
   discovered: z.boolean(),
-  imageUrl: z.string().url().nullable().optional()
+  imageUrl: z.string().nullable().optional(),
+  position: roomObjectPositionSchema.optional(),
+  render: roomObjectRenderSchema.optional(),
+  interactionType: z.enum(["tap", "tap_note", "tap_reveal"]).optional()
 });
 
 export const publicImageClueSchema = z.object({
   assetId: idSchema,
-  url: z.string().url().nullable(),
+  url: z.string().nullable(),
   alt: z.string(),
   safeDescription: z.string().nullable()
 });
 
 export const publicPetSchema = z.object({
   name: z.string(),
-  avatarUrl: z.string().url().nullable(),
+  avatarUrl: z.string().nullable(),
   mood: z.string(),
-  maxHintLevel: revealLevelSchema
+  maxHintLevel: revealLevelSchema,
+  type: z.enum(["cat", "dog"]).optional(),
+  position: roomObjectPositionSchema.optional(),
+  chatEnabled: z.literal(true).optional()
 });
 
 export const publicChoiceSchema = z.object({
@@ -127,6 +158,8 @@ export const getRoomPlayResponseSchema = z.object({
   roomId: idSchema,
   publicTitle: z.string(),
   visualTheme: z.string(),
+  renderTarget: z.literal("2.5d_miniature_cabin").optional(),
+  stage: publicRoomStageSchema.optional(),
   objects: z.array(publicRoomObjectSchema),
   imageClue: publicImageClueSchema.nullable(),
   pet: publicPetSchema,
