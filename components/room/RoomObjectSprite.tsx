@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ImageOff, Sparkle } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { MiniRoomObject } from "@/lib/adapters/roomPublicDataAdapter";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,17 @@ function scaleFromDepth(object: MiniRoomObject) {
   return object.scale || object.render.scale || yScale + Math.min(0.08, depth / 500);
 }
 
+function isPlantLikeObject(object: MiniRoomObject) {
+  const haystack = [
+    object.id,
+    object.name,
+    object.keyword,
+    object.render.style
+  ].join(" ");
+
+  return /plant|叶|花|草|芽|盆栽/i.test(haystack);
+}
+
 export function RoomObjectSprite({
   object,
   index,
@@ -31,11 +42,21 @@ export function RoomObjectSprite({
   onSelect
 }: RoomObjectSpriteProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [raised, setRaised] = useState(false);
+  const reduceMotion = useReducedMotion();
   const scale = scaleFromDepth(object);
   const width = object.render.width * scale;
   const height = object.render.height * scale;
   const hasImage = Boolean(object.assetUrl && !imageFailed);
   const shadow = object.shadow;
+  const isRaised = selected || raised;
+  const plantLike = isPlantLikeObject(object);
+  const idleAnimate = reduceMotion
+    ? undefined
+    : {
+        scale: [1, 1.005, 0.995, 1],
+        rotate: plantLike ? [0, 1.5, -1.5, 0] : 0
+      };
 
   return (
     <motion.button
@@ -47,6 +68,10 @@ export function RoomObjectSprite({
       whileHover={{ y: -5 }}
       whileFocus={{ y: -5 }}
       whileTap={{ y: -2, scale: 0.98 }}
+      onHoverStart={() => setRaised(true)}
+      onHoverEnd={() => setRaised(false)}
+      onFocus={() => setRaised(true)}
+      onBlur={() => setRaised(false)}
       transition={{ type: "spring", stiffness: 270, damping: 24 }}
       className={cn(
         "group absolute outline-none",
@@ -65,15 +90,20 @@ export function RoomObjectSprite({
       }}
     >
       {shadow.enabled ? (
-        <span
+        <motion.span
           className="pointer-events-none absolute left-1/2 top-full rounded-full bg-[#2d1b0f] transition-opacity"
           style={{
-            width: shadow.width * scale,
-            height: shadow.height * scale,
-            opacity: selected ? Math.min(0.24, shadow.opacity) : shadow.opacity,
-            filter: `blur(${shadow.blur}px)`,
-            transform: `translate(-50%, ${shadow.offsetY}px) scaleX(${1.08 + object.position.y / 360})`
+            width: shadow.width * scale * (isRaised ? 1.18 : 1),
+            height: shadow.height * scale * (isRaised ? 1.08 : 1),
+            filter: `blur(${shadow.blur + (isRaised ? 2 : 0)}px)`
           }}
+          animate={{
+            opacity: isRaised ? Math.min(0.22, shadow.opacity * 0.72) : shadow.opacity,
+            x: "-50%",
+            y: shadow.offsetY + (isRaised ? 4 : 0),
+            scaleX: 1.08 + object.position.y / 360 + (isRaised ? 0.12 : 0)
+          }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
         />
       ) : null}
 
@@ -91,34 +121,40 @@ export function RoomObjectSprite({
         }}
       />
 
-      {hasImage ? (
-        <img
-          src={object.assetUrl ?? ""}
-          alt={object.name}
-          draggable={false}
-          className={cn(
-            "pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain",
-            "drop-shadow-[0_10px_9px_rgba(45,27,15,0.28)] transition",
-            discovered ? "brightness-105" : "brightness-95",
-            selected && "brightness-110"
-          )}
-          onError={(event) => {
-            event.currentTarget.style.display = "none";
-            setImageFailed(true);
-          }}
-        />
-      ) : (
-        <span
-          className="torn-edge paper-grain absolute bottom-1 left-1/2 flex h-20 w-16 -translate-x-1/2 items-center justify-center bg-cream/88 text-coffee/55 shadow-[0_10px_12px_rgba(45,27,15,0.24),inset_-8px_-10px_0_rgba(138,91,54,0.12)]"
-          style={{
-            clipPath: "polygon(18% 8%, 88% 0, 100% 76%, 46% 100%, 0 72%)"
-          }}
-        >
-          <span className="absolute bottom-0 left-1/2 h-3 w-11 -translate-x-1/2 rounded-full bg-[#2d1b0f]/16 blur-[4px]" />
-          <ImageOff className="relative h-6 w-6" strokeWidth={1.5} />
-          <Sparkle className="absolute right-2 top-2 h-3 w-3 text-warm-orange/65" strokeWidth={1.5} />
-        </span>
-      )}
+      <motion.span
+        className="pointer-events-none absolute inset-0"
+        animate={idleAnimate}
+        transition={{ duration: plantLike ? 4.8 : 4, repeat: Infinity, ease: "easeInOut" }}
+      >
+        {hasImage ? (
+          <img
+            src={object.assetUrl ?? ""}
+            alt={object.name}
+            draggable={false}
+            className={cn(
+              "pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain",
+              "drop-shadow-[var(--room-sprite-shadow)] transition",
+              discovered ? "brightness-105" : "brightness-95",
+              selected && "brightness-110"
+            )}
+            onError={(event) => {
+              event.currentTarget.style.display = "none";
+              setImageFailed(true);
+            }}
+          />
+        ) : (
+          <span
+            className="torn-edge paper-grain absolute bottom-1 left-1/2 flex h-20 w-16 -translate-x-1/2 items-center justify-center bg-cream/88 text-coffee/55 shadow-[var(--room-sprite-shadow),inset_-8px_-10px_0_rgba(138,91,54,0.12)]"
+            style={{
+              clipPath: "polygon(18% 8%, 88% 0, 100% 76%, 46% 100%, 0 72%)"
+            }}
+          >
+            <span className="absolute bottom-0 left-1/2 h-3 w-11 -translate-x-1/2 rounded-full bg-[#2d1b0f]/16 blur-[4px]" />
+            <ImageOff className="relative h-6 w-6" strokeWidth={1.5} />
+            <Sparkle className="absolute right-2 top-2 h-3 w-3 text-warm-orange/65" strokeWidth={1.5} />
+          </span>
+        )}
+      </motion.span>
 
       <span
         className={cn(
