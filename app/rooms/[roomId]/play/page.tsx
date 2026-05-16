@@ -102,7 +102,11 @@ export default function RoomPlayPage() {
         {adaptedRoom ? (
           <>
             <LayeredMiniRoom room={adaptedRoom} />
-            <PaperButton className="mb-12 mt-7" withTape>
+            <PaperButton
+              className="mb-12 mt-7"
+              withTape
+              onClick={() => router.push(`/guess/${roomId}`)}
+            >
               我好像猜到了
               <Heart className="h-7 w-7 text-warm-orange" />
             </PaperButton>
