@@ -75,6 +75,67 @@ export const publicRoomPlaySchema = z.object({
 export type RoomObject = z.infer<typeof roomObjectSchema>;
 export type PublicRoomPlayData = z.infer<typeof publicRoomPlaySchema>;
 
+export const guessOptionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  description: z.string()
+});
+
+export const publicGuessPageSchema = z.object({
+  roomId: z.string(),
+  publicTitle: z.string(),
+  clues: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      clue: z.string(),
+      keyword: z.string()
+    })
+  ),
+  options: z.array(guessOptionSchema)
+});
+
+export const guessSubmissionSchema = z.object({
+  roomId: z.string(),
+  selectedOptionId: z.string(),
+  ownGuess: z.string().max(80),
+  discoveredObjectIds: z.array(z.string())
+});
+
+export const publicGuessResultSchema = z.object({
+  guessId: z.string(),
+  roomId: z.string(),
+  title: z.string(),
+  scorePercent: z.number().min(0).max(100),
+  tacitScore: z.number().min(0).max(100),
+  tacitThreshold: z.number().min(0).max(100),
+  badgeTitle: z.string(),
+  comment: z.string(),
+  hitKeywords: z.array(z.string()),
+  missedNote: z.string(),
+  partialOriginalSentence: z.string(),
+  shareText: z.string(),
+  canRequestDiary: z.boolean(),
+  savedToDiary: z.boolean()
+});
+
+export const ownerResultViewSchema = z.object({
+  guesserName: z.string(),
+  selectedOptionLabel: z.string(),
+  discoveredClues: z.array(z.string()),
+  finalGuess: z.string(),
+  scorePercent: z.number().min(0).max(100),
+  tacitScore: z.number().min(0).max(100),
+  diaryRequested: z.boolean(),
+  diaryRequestMessage: z.string().nullable()
+});
+
+export type GuessOption = z.infer<typeof guessOptionSchema>;
+export type PublicGuessPageData = z.infer<typeof publicGuessPageSchema>;
+export type GuessSubmission = z.infer<typeof guessSubmissionSchema>;
+export type PublicGuessResult = z.infer<typeof publicGuessResultSchema>;
+export type OwnerResultViewData = z.infer<typeof ownerResultViewSchema>;
+
 export const demoRoom: RoomPreview = roomPreviewSchema.parse({
   roomId: "demo-paper-cabin",
   publicTitle: "朋友的心事小屋",
