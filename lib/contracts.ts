@@ -18,6 +18,22 @@ export const roomPreviewSchema = z.object({
 export type Clue = z.infer<typeof clueSchema>;
 export type RoomPreview = z.infer<typeof roomPreviewSchema>;
 
+export const createRoomDraftSchema = z.object({
+  sentence: z.string().min(0).max(120),
+  moodTags: z.array(z.enum(["想念", "压力", "吐槽", "暗恋", "小确幸"])),
+  envelopeImage: z
+    .object({
+      name: z.string(),
+      type: z.string(),
+      size: z.number(),
+      previewUrl: z.string()
+    })
+    .nullable()
+});
+
+export type CreateRoomDraft = z.infer<typeof createRoomDraftSchema>;
+export type MoodTag = CreateRoomDraft["moodTags"][number];
+
 export const demoRoom: RoomPreview = roomPreviewSchema.parse({
   roomId: "demo-paper-cabin",
   publicTitle: "朋友的心事小屋",
