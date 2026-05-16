@@ -67,13 +67,29 @@ export function HanddrawnTornPaper({ color = "var(--cream)", className, children
   return (
     <div className={cn("relative p-6 overflow-visible", className)}>
       <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <defs>
+          <pattern id="paperTexture" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect width="20" height="20" fill={color} />
+            <circle cx="2" cy="2" r="0.5" fill="black" fillOpacity="0.03" />
+            <circle cx="15" cy="12" r="0.8" fill="white" fillOpacity="0.05" />
+          </pattern>
+        </defs>
         <path
-          d="M2,2 Q5,0 10,2 T20,1 T30,3 T40,1 T50,2 T60,0 T70,3 T80,1 T90,2 T98,5 
-             L97,95 Q95,98 90,96 T80,98 T70,95 T60,97 T50,95 T40,98 T30,96 T20,97 T10,95 T2,92 Z"
-          fill={color}
+          d="M3,4 Q6,1 12,3 T22,2 T32,5 T45,2 T58,4 T72,1 T85,4 T97,6 
+             L96,94 Q90,98 80,95 T65,98 T50,94 T35,97 T20,95 T6,92 Z"
+          fill="url(#paperTexture)"
           filter="url(#roughEdge)"
-          stroke="rgba(0,0,0,0.05)"
+          stroke="rgba(63,39,24,0.1)"
           strokeWidth="0.5"
+        />
+        {/* Frayed edge detail */}
+        <path
+          d="M3,4 Q6,1 12,3 T22,2 T32,5 T45,2 T58,4 T72,1 T85,4 T97,6"
+          fill="none"
+          stroke="white"
+          strokeOpacity="0.4"
+          strokeWidth="1"
+          filter="url(#roughEdge)"
         />
       </svg>
       <div className="relative z-10">{children}</div>
@@ -81,30 +97,93 @@ export function HanddrawnTornPaper({ color = "var(--cream)", className, children
   );
 }
 
-export function HanddrawnTape({ className, color = "rgba(221, 197, 147, 0.5)" }: { className?: string, color?: string }) {
+export function HanddrawnTape({ className, color = "rgba(255, 255, 255, 0.4)" }: { className?: string, color?: string }) {
   return (
     <div className={cn("absolute z-20 pointer-events-none", className)}>
-      <svg width="100" height="30" viewBox="0 0 100 30" preserveAspectRatio="none">
+      <svg width="120" height="40" viewBox="0 0 120 40" preserveAspectRatio="none">
+        <defs>
+          <pattern id="botanicalPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M10,20 Q15,10 20,20 T30,20" stroke="#77805f" strokeWidth="0.5" fill="none" opacity="0.4" />
+            <circle cx="15" cy="15" r="1.5" fill="#77805f" opacity="0.2" />
+            <path d="M5,30 Q10,25 15,30" stroke="#77805f" strokeWidth="0.3" fill="none" opacity="0.3" />
+          </pattern>
+        </defs>
         <path
-          d="M2,5 Q5,2 15,4 T35,3 T55,5 T75,2 T95,6 L98,25 Q95,28 85,26 T65,27 T45,25 T25,28 T5,24 Z"
+          d="M4,8 Q10,3 30,6 T60,4 T90,7 T115,10 L112,32 Q100,38 70,34 T30,36 T8,30 Z"
           fill={color}
           filter="url(#roughEdge)"
-          opacity="0.8"
         />
         <path
-          d="M2,5 Q5,2 15,4 T35,3 T55,5 T75,2 T95,6"
+          d="M4,8 Q10,3 30,6 T60,4 T90,7 T115,10 L112,32 Q100,38 70,34 T30,36 T8,30 Z"
+          fill="url(#botanicalPattern)"
+          filter="url(#roughEdge)"
+        />
+        <path
+          d="M4,8 Q10,3 30,6 T60,4 T90,7 T115,10"
           fill="none"
           stroke="white"
           strokeOpacity="0.3"
-          strokeWidth="1"
+          strokeWidth="1.5"
         />
-        {/* Washi tape fibers */}
-        <path
-          d="M10,5 L90,25 M20,4 L80,26 M30,6 L70,24"
-          stroke="white"
-          strokeOpacity="0.1"
-          strokeWidth="0.5"
-        />
+      </svg>
+    </div>
+  );
+}
+
+export function HanddrawnBrassKey({ className }: { className?: string }) {
+  return (
+    <div className={cn("relative", className)}>
+      <svg viewBox="0 0 100 40" className="w-full h-full drop-shadow-md">
+        <defs>
+          <linearGradient id="keyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#8b6b3e" />
+            <stop offset="50%" stopColor="#c5a059" />
+            <stop offset="100%" stopColor="#8b6b3e" />
+          </linearGradient>
+        </defs>
+        {/* Bow (handle) */}
+        <path d="M10,20 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 M10,20 m-3,0 a3,3 0 1,1 6,0 a3,3 0 1,1 -6,0" fill="url(#keyGrad)" filter="url(#handWobble)" />
+        <path d="M10,20 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0" fill="none" stroke="black" strokeOpacity="0.1" strokeWidth="0.5" />
+        
+        {/* Shaft */}
+        <rect x="18" y="18" width="60" height="4" rx="1" fill="url(#keyGrad)" filter="url(#handWobble)" />
+        
+        {/* Bit */}
+        <path d="M70,22 v6 h6 v-3 h2 v-3 Z" fill="url(#keyGrad)" filter="url(#handWobble)" />
+        <path d="M72,25 h2 v2 h-2 Z" fill="black" fillOpacity="0.2" />
+      </svg>
+    </div>
+  );
+}
+
+export function HanddrawnVintageClock({ className }: { className?: string }) {
+  return (
+    <div className={cn("relative", className)}>
+      <svg viewBox="0 0 100 120" className="w-full h-full drop-shadow-lg">
+        {/* Body */}
+        <path d="M10,110 L10,50 Q10,10 50,10 T90,50 L90,110 Z" fill="#77805f" filter="url(#roughEdge)" />
+        <path d="M10,110 L90,110" stroke="black" strokeOpacity="0.2" strokeWidth="2" />
+        
+        {/* Face */}
+        <circle cx="50" cy="55" r="30" fill="#fff5df" filter="url(#handWobble)" />
+        <circle cx="50" cy="55" r="28" fill="none" stroke="black" strokeOpacity="0.1" strokeWidth="0.5" />
+        
+        {/* Numbers (simplified dots) */}
+        {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(deg => (
+          <circle key={deg} cx={50 + 24 * Math.sin(deg * Math.PI / 180)} cy={55 - 24 * Math.cos(deg * Math.PI / 180)} r="1" fill="#3f2718" opacity="0.6" />
+        ))}
+        
+        {/* Hands */}
+        <path d="M50,55 L50,35" stroke="#3f2718" strokeWidth="2" strokeLinecap="round" />
+        <path d="M50,55 L65,55" stroke="#3f2718" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="50" cy="55" r="2" fill="#3f2718" />
+        
+        {/* Bottom Drawer */}
+        <rect x="20" y="90" width="60" height="15" rx="2" fill="#e8b6a7" fillOpacity="0.8" />
+        <circle cx="50" cy="97.5" r="2" fill="#8b6b3e" />
+        
+        {/* Flower detail */}
+        <path d="M45,10 Q50,0 55,10" fill="none" stroke="#e8b6a7" strokeWidth="2" opacity="0.6" />
       </svg>
     </div>
   );

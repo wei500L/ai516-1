@@ -13,7 +13,12 @@ import {
   Star,
   X
 } from "lucide-react";
-import { HanddrawnIcons, HanddrawnCabin } from "@/components/handbook/handdrawn-assets";
+import { 
+  HanddrawnIcons, 
+  HanddrawnCabin, 
+  HanddrawnBrassKey, 
+  HanddrawnVintageClock 
+} from "@/components/handbook/handdrawn-assets";
 import { AnimatePresence, motion } from "motion/react";
 import { AppShell } from "@/components/layout/app-shell";
 import { PaperPage } from "@/components/layout/paper-page";
@@ -124,6 +129,8 @@ function HomeScreen() {
     <PaperPage className="pt-20" innerClassName="flex min-h-[calc(100dvh-7rem)] flex-col">
       <Tape className="left-16 top-12" />
       <Stamp className="absolute right-8 top-16" />
+      <HanddrawnVintageClock className="absolute right-4 bottom-24 w-16 h-20 opacity-80" />
+      <HanddrawnBrassKey className="absolute left-10 bottom-4 w-24 h-10 rotate-[15deg] opacity-70" />
       <section className="text-center">
         <p className="soft-title text-2xl">《心事小屋》</p>
         <div className="mx-auto mt-3 flex w-32 items-center gap-2 text-coffee/32">
