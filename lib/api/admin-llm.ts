@@ -4,9 +4,12 @@ import type {
   AdminLlmTestImageRequest,
   AdminLlmTestResult
 } from "@/lib/schemas/adminLlmConfig";
-import { adminLlmConfigDraftSchema } from "@/lib/schemas/adminLlmConfig";
+import {
+  adminLlmConfigDraftSchema,
+  createDefaultAdminLlmConfigDraft
+} from "@/lib/schemas/adminLlmConfig";
 
-const ADMIN_LLM_API_BASE = "/api/admin/llm";
+const ADMIN_LLM_API_BASE = "/api/admin/llm-settings";
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${ADMIN_LLM_API_BASE}${path}`, {
@@ -28,29 +31,26 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function fetchAdminLlmConfig() {
-  const payload = await requestJson<unknown>("/config", { method: "GET" });
+  const payload = await requestJson<unknown>("", { method: "GET" });
   return adminLlmConfigDraftSchema.parse(payload);
 }
 
 export async function saveAdminLlmConfig(config: AdminLlmConfigDraft) {
-  const payload = await requestJson<unknown>("/config", {
-    method: "PUT",
+  const payload = await requestJson<unknown>("", {
+    method: "POST",
     body: JSON.stringify(config)
   });
   return adminLlmConfigDraftSchema.parse(payload);
 }
 
 export async function resetAdminLlmConfig() {
-  const payload = await requestJson<unknown>("/config/reset", {
-    method: "POST"
-  });
-  return adminLlmConfigDraftSchema.parse(payload);
+  return createDefaultAdminLlmConfigDraft();
 }
 
 export async function testAdminLlmChat(
   request: AdminLlmTestChatRequest
 ): Promise<AdminLlmTestResult> {
-  return requestJson<AdminLlmTestResult>("/test/chat", {
+  return requestJson<AdminLlmTestResult>("/test-chat", {
     method: "POST",
     body: JSON.stringify(request)
   });
@@ -59,7 +59,7 @@ export async function testAdminLlmChat(
 export async function testAdminLlmImage(
   request: AdminLlmTestImageRequest
 ): Promise<AdminLlmTestResult> {
-  return requestJson<AdminLlmTestResult>("/test/image", {
+  return requestJson<AdminLlmTestResult>("/test-image", {
     method: "POST",
     body: JSON.stringify(request)
   });

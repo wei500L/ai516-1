@@ -46,7 +46,7 @@ export function LlmProviderForm({ initialConfig, onLoaded }: LlmProviderFormProp
     onLoaded?.(form);
   }, [form, onLoaded]);
 
-  function updateSection<K extends keyof AdminLlmConfigDraft>(
+  function updateSection<K extends "provider" | "chat" | "image" | "style">(
     section: K,
     key: keyof AdminLlmConfigDraft[K],
     value: AdminLlmConfigDraft[K][keyof AdminLlmConfigDraft[K]]

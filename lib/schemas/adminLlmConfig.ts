@@ -22,6 +22,7 @@ export const adminLlmProviderConfigSchema = z
     providerName: z.string().trim().min(1).max(64),
     baseUrl: z.string().trim().url(),
     apiKey: z.string().trim().min(1).max(512),
+    apiKeyMasked: z.string().trim().max(64).nullable().optional(),
     chatModel: z.string().trim().min(1).max(128),
     imageModel: z.string().trim().min(1).max(128),
     defaultTimeoutMs: z.number().int().min(1000).max(120000),
@@ -31,9 +32,20 @@ export const adminLlmProviderConfigSchema = z
   })
   .strict();
 
-export const adminLlmProviderDraftSchema = adminLlmProviderConfigSchema.extend({
-  apiKey: z.string().trim().max(512)
-});
+export const adminLlmProviderDraftSchema = z
+  .object({
+    providerName: z.string().trim().min(1).max(64),
+    baseUrl: z.string().trim().url(),
+    apiKey: z.string().trim().max(512),
+    apiKeyMasked: z.string().trim().max(64).nullable().optional(),
+    chatModel: z.string().trim().min(1).max(128),
+    imageModel: z.string().trim().min(1).max(128),
+    defaultTimeoutMs: z.number().int().min(1000).max(120000),
+    maxConcurrentImageJobs: z.number().int().min(1).max(12),
+    enableSemanticAnalysis: z.boolean(),
+    enableConcurrentImageGeneration: z.boolean()
+  })
+  .strict();
 
 export const adminLlmChatConfigSchema = z
   .object({
@@ -62,21 +74,30 @@ export const adminLlmStyleConfigSchema = z
 
 export const adminLlmConfigSchema = z
   .object({
+    id: z.string().trim().min(1).max(80).nullable().optional(),
     provider: adminLlmProviderConfigSchema,
     chat: adminLlmChatConfigSchema,
     image: adminLlmImageConfigSchema,
-    style: adminLlmStyleConfigSchema
+    style: adminLlmStyleConfigSchema,
+    isActive: z.boolean().optional()
   })
   .strict();
 
 export const adminLlmConfigDraftSchema = z
   .object({
+    id: z.string().trim().min(1).max(80).nullable().optional(),
     provider: adminLlmProviderDraftSchema,
     chat: adminLlmChatConfigSchema,
     image: adminLlmImageConfigSchema,
-    style: adminLlmStyleConfigSchema
+    style: adminLlmStyleConfigSchema,
+    isActive: z.boolean().optional()
   })
   .strict();
+
+export const adminLlmConfigViewSchema = adminLlmConfigDraftSchema.extend({
+  id: z.string().trim().min(1).max(80),
+  isActive: z.boolean()
+});
 
 export const adminLlmTestChatRequestSchema = z
   .object({
@@ -98,9 +119,11 @@ export const adminLlmTestImageRequestSchema = z
 export const adminLlmTestResultSchema = z
   .object({
     ok: z.boolean(),
+    status: z.enum(["ok", "error"]).optional(),
     latencyMs: z.number().int().nonnegative(),
     message: z.string().max(2000).nullable(),
-    error: z.string().max(2000).nullable()
+    error: z.string().max(2000).nullable(),
+    modeSummary: z.string().max(1000).optional()
   })
   .strict();
 
@@ -118,6 +141,7 @@ export type AdminLlmImageConfig = z.infer<typeof adminLlmImageConfigSchema>;
 export type AdminLlmStyleConfig = z.infer<typeof adminLlmStyleConfigSchema>;
 export type AdminLlmConfig = z.infer<typeof adminLlmConfigSchema>;
 export type AdminLlmConfigDraft = z.infer<typeof adminLlmConfigDraftSchema>;
+export type AdminLlmConfigView = z.infer<typeof adminLlmConfigViewSchema>;
 export type AdminLlmTestChatRequest = z.infer<
   typeof adminLlmTestChatRequestSchema
 >;
@@ -132,6 +156,7 @@ export function createDefaultAdminLlmConfigDraft(): AdminLlmConfigDraft {
       providerName: "OpenAI Compatible",
       baseUrl: "https://api.openai.com/v1",
       apiKey: "",
+      apiKeyMasked: null,
       chatModel: "gpt-4o-mini",
       imageModel: "gpt-image-1",
       defaultTimeoutMs: 30000,
@@ -157,6 +182,7 @@ export function createDefaultAdminLlmConfigDraft(): AdminLlmConfigDraft {
       miniatureHouseStylePrompt:
         "纸板小屋、旧纸边缘、手作痕迹、温柔低饱和、带一点生活气。",
       negativePrompt: "科技感, 赛博风, 玻璃拟态, 霓虹, 金属UI"
-    }
+    },
+    isActive: true
   });
 }
