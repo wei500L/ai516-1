@@ -80,7 +80,7 @@ export function PetSprite({ pet, zIndex, onSelect }: PetSpriteProps) {
             src={pet.assetUrl}
             alt={pet.name}
             draggable={false}
-            className="pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain drop-shadow-[var(--room-sprite-shadow)] transition group-hover:-translate-y-1"
+            className="pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain [filter:drop-shadow(var(--room-sprite-shadow))_drop-shadow(var(--room-sprite-shadow-soft))_drop-shadow(var(--room-rim-x)_var(--room-rim-y)_0_var(--room-rim-color))] transition group-hover:-translate-y-1"
           />
         ) : (
           <>
@@ -91,6 +91,29 @@ export function PetSprite({ pet, zIndex, onSelect }: PetSpriteProps) {
           </>
         )}
       </motion.span>
+
+      {shadow.enabled && pet.assetUrl ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-full -translate-x-1/2"
+          style={{
+            width,
+            height: height * 0.55,
+            transform: "translate(-50%, -2%) scaleY(-1)",
+            WebkitMaskImage:
+              "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 70%)",
+            maskImage:
+              "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 70%)"
+          }}
+        >
+          <img
+            src={pet.assetUrl}
+            alt=""
+            draggable={false}
+            className="absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain opacity-30 blur-[2px]"
+          />
+        </span>
+      ) : null}
     </motion.button>
   );
 }

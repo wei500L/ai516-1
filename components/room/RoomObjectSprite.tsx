@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ImageOff, Sparkle } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import type { MiniRoomObject } from "@/lib/adapters/roomPublicDataAdapter";
+import type { MiniRoomLayer, MiniRoomObject } from "@/lib/adapters/roomPublicDataAdapter";
 import { cn } from "@/lib/utils";
 
 type RoomObjectSpriteProps = {
@@ -47,7 +47,11 @@ export function RoomObjectSprite({
   const scale = scaleFromDepth(object);
   const width = object.render.width * scale;
   const height = object.render.height * scale;
-  const hasImage = Boolean(object.assetUrl && !imageFailed);
+  const layers = object.render.layers ?? [];
+  const hasLayers = layers.length > 0;
+  const hasImage = Boolean(
+    (object.assetUrl || hasLayers) && !imageFailed
+  );
   const shadow = object.shadow;
   const isRaised = selected || raised;
   const plantLike = isPlantLikeObject(object);
@@ -127,14 +131,24 @@ export function RoomObjectSprite({
         animate={idleAnimate}
         transition={{ duration: plantLike ? 4.8 : 4, repeat: Infinity, ease: "easeInOut" }}
       >
-        {hasImage ? (
+        {hasImage && hasLayers ? (
+          <ObjectLayerStack
+            layers={layers}
+            alt={object.name}
+            discovered={discovered}
+            selected={selected}
+            reduceMotion={reduceMotion}
+            onAnyError={() => setImageFailed(true)}
+          />
+        ) : hasImage ? (
           <img
             src={object.assetUrl ?? ""}
             alt={object.name}
             draggable={false}
             className={cn(
-              "pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain",
-              "drop-shadow-[var(--room-sprite-shadow)] transition",
+              "pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain transition",
+              "drop-shadow-[var(--room-sprite-shadow)]",
+              "[filter:drop-shadow(var(--room-sprite-shadow))_drop-shadow(var(--room-sprite-shadow-soft))_drop-shadow(var(--room-rim-x)_var(--room-rim-y)_0_var(--room-rim-color))]",
               discovered ? "brightness-105" : "brightness-95",
               selected && "brightness-110"
             )}
@@ -145,7 +159,7 @@ export function RoomObjectSprite({
           />
         ) : (
           <span
-            className="torn-edge paper-grain absolute bottom-1 left-1/2 flex h-20 w-16 -translate-x-1/2 items-center justify-center bg-cream/88 text-coffee/55 shadow-[var(--room-sprite-shadow),inset_-8px_-10px_0_rgba(138,91,54,0.12)]"
+            className="torn-edge paper-grain absolute bottom-1 left-1/2 flex h-20 w-16 -translate-x-1/2 items-center justify-center bg-cream/88 text-coffee/55 shadow-[var(--room-sprite-shadow),var(--room-sprite-shadow-soft),inset_-8px_-10px_0_rgba(138,91,54,0.12)]"
             style={{
               clipPath: "polygon(18% 8%, 88% 0, 100% 76%, 46% 100%, 0 72%)"
             }}
@@ -156,6 +170,29 @@ export function RoomObjectSprite({
           </span>
         )}
       </motion.span>
+
+      {shadow.enabled && hasImage ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-full -translate-x-1/2"
+          style={{
+            width,
+            height: height * 0.55,
+            transform: "translate(-50%, -2%) scaleY(-1)",
+            WebkitMaskImage:
+              "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 70%)",
+            maskImage:
+              "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 70%)"
+          }}
+        >
+          <img
+            src={object.assetUrl ?? ""}
+            alt=""
+            draggable={false}
+            className="absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain opacity-30 blur-[2px]"
+          />
+        </span>
+      ) : null}
 
       <span
         className={cn(
@@ -168,5 +205,82 @@ export function RoomObjectSprite({
         {index + 1}
       </span>
     </motion.button>
+  );
+}
+
+const LAYER_DRAW_ORDER: Record<MiniRoomLayer["role"], number> = {
+  back: 0,
+  mid: 1,
+  front: 2
+};
+
+function ObjectLayerStack({
+  layers,
+  alt,
+  discovered,
+  selected,
+  reduceMotion,
+  onAnyError
+}: {
+  layers: MiniRoomLayer[];
+  alt: string;
+  discovered: boolean;
+  selected: boolean;
+  reduceMotion: boolean | null;
+  onAnyError: () => void;
+}) {
+  const sorted = [...layers].sort(
+    (a, b) => LAYER_DRAW_ORDER[a.role] - LAYER_DRAW_ORDER[b.role]
+  );
+
+  return (
+    <>
+      {sorted.map((layer) => {
+        const depthScale =
+          layer.role === "back" ? 0.94 : layer.role === "front" ? 1.05 : 1;
+        const verticalOffset =
+          layer.role === "back" ? -3 : layer.role === "front" ? 2 : 0;
+        const swayDuration =
+          layer.role === "front" ? 4.4 : layer.role === "back" ? 5.8 : 5;
+        const sway = layer.swayAmplitude;
+        const layerAnimate =
+          reduceMotion || sway <= 0
+            ? undefined
+            : {
+                rotate: [0, sway, -sway, 0],
+                y: [0, -sway * 0.4, sway * 0.4, 0]
+              };
+
+        return (
+          <motion.img
+            key={layer.role}
+            src={layer.assetUrl}
+            alt={alt}
+            draggable={false}
+            animate={layerAnimate}
+            transition={{
+              duration: swayDuration,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className={cn(
+              "pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain transition",
+              "[filter:drop-shadow(var(--room-sprite-shadow))_drop-shadow(var(--room-sprite-shadow-soft))_drop-shadow(var(--room-rim-x)_var(--room-rim-y)_0_var(--room-rim-color))]",
+              discovered ? "brightness-105" : "brightness-95",
+              selected && "brightness-110"
+            )}
+            style={{
+              translateY: verticalOffset,
+              scale: depthScale,
+              zIndex: LAYER_DRAW_ORDER[layer.role]
+            }}
+            onError={(event) => {
+              event.currentTarget.style.display = "none";
+              onAnyError();
+            }}
+          />
+        );
+      })}
+    </>
   );
 }
