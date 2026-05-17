@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ImageOff, Sparkle } from "lucide-react";
+import { Sparkle } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { PrototypeAsset } from "@/components/prototype/prototype-asset";
 import type { MiniRoomObject } from "@/lib/adapters/roomPublicDataAdapter";
+import { clueObjectAsset, numberToken } from "@/lib/prototype-assets";
 import { cn } from "@/lib/utils";
 
 type RoomObjectSpriteProps = {
@@ -57,6 +59,7 @@ export function RoomObjectSprite({
         scale: [1, 1.005, 0.995, 1],
         rotate: plantLike ? [0, 1.5, -1.5, 0] : 0
       };
+  const fallbackKey = ["envelope", "clock", "plant", "window", "chair-note"][Math.abs(index) % 5];
 
   return (
     <motion.button
@@ -134,7 +137,7 @@ export function RoomObjectSprite({
             draggable={false}
             className={cn(
               "pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain",
-              "drop-shadow-[var(--room-sprite-shadow)] transition",
+              "drop-shadow-[0_10px_9px_rgba(45,27,15,0.28)] transition",
               discovered ? "brightness-105" : "brightness-95",
               selected && "brightness-110"
             )}
@@ -145,13 +148,12 @@ export function RoomObjectSprite({
           />
         ) : (
           <span
-            className="torn-edge paper-grain absolute bottom-1 left-1/2 flex h-20 w-16 -translate-x-1/2 items-center justify-center bg-cream/88 text-coffee/55 shadow-[var(--room-sprite-shadow),inset_-8px_-10px_0_rgba(138,91,54,0.12)]"
-            style={{
-              clipPath: "polygon(18% 8%, 88% 0, 100% 76%, 46% 100%, 0 72%)"
-            }}
+            className="absolute bottom-1 left-1/2 flex h-20 w-20 -translate-x-1/2 items-center justify-center text-coffee/55 drop-shadow-sticker"
           >
-            <span className="absolute bottom-0 left-1/2 h-3 w-11 -translate-x-1/2 rounded-full bg-[#2d1b0f]/16 blur-[4px]" />
-            <ImageOff className="relative h-6 w-6" strokeWidth={1.5} />
+            <PrototypeAsset
+              src={clueObjectAsset(fallbackKey, discovered ? "viewed" : selected ? "active" : "default")}
+              className="absolute inset-0 h-full w-full"
+            />
             <Sparkle className="absolute right-2 top-2 h-3 w-3 text-warm-orange/65" strokeWidth={1.5} />
           </span>
         )}
@@ -159,13 +161,11 @@ export function RoomObjectSprite({
 
       <span
         className={cn(
-          "absolute -left-1 -top-1 flex h-10 w-10 items-center justify-center rounded-full border-2 border-cream/95",
-          "bg-warm-orange/54 text-center soft-title text-lg text-cream shadow-[0_0_18px_rgba(255,214,126,0.95)]",
-          selected && "bg-warm-orange/78 shadow-[0_0_26px_rgba(255,214,126,1)]",
-          discovered && "border-warm-orange bg-cream text-warm-orange"
+          "absolute -left-2 -top-2 block h-11 w-11 drop-shadow-[0_0_12px_rgba(255,215,123,0.85)]",
+          selected && "scale-110"
         )}
       >
-        {index + 1}
+        <PrototypeAsset src={numberToken(Math.min(index + 1, 5), discovered ? "active" : "default")} className="h-full w-full" />
       </span>
     </motion.button>
   );

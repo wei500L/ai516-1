@@ -4,6 +4,8 @@ import { motion } from "motion/react";
 import type { HTMLMotionProps } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Tape } from "@/components/handbook/tape";
+import { PrototypeAsset } from "@/components/prototype/prototype-asset";
+import { buttons } from "@/lib/prototype-assets";
 
 type PaperButtonProps = Omit<HTMLMotionProps<"button">, "children"> & {
   children?: React.ReactNode;
@@ -12,11 +14,18 @@ type PaperButtonProps = Omit<HTMLMotionProps<"button">, "children"> & {
   withTape?: boolean;
 };
 
+const variantAssets = {
+  sage: buttons.primary,
+  paper: buttons.secondary,
+  parchment: buttons.secondary,
+  brick: buttons.pressed
+};
+
 const variantClasses = {
-  sage: "bg-sage text-cream",
-  paper: "bg-cream text-coffee",
-  parchment: "bg-parchment text-coffee",
-  brick: "bg-brick-red text-cream"
+  sage: "text-cream",
+  paper: "text-coffee",
+  parchment: "text-coffee",
+  brick: "text-cream"
 };
 
 export function PaperButton({
@@ -34,16 +43,23 @@ export function PaperButton({
       transition={{ type: "spring", stiffness: 420, damping: 24 }}
       type={type}
       className={cn(
-        "torn-edge paper-grain relative inline-flex min-h-14 w-full items-center justify-center gap-3 overflow-visible px-7 py-4 text-center soft-title text-[28px] leading-none shadow-sticker outline-none",
+        "relative inline-flex min-h-14 w-full items-center justify-center gap-3 overflow-visible px-7 py-4 text-center soft-title text-[clamp(22px,6.2vw,28px)] leading-tight drop-shadow-sticker outline-none",
         "focus-visible:ring-2 focus-visible:ring-warm-orange/50 disabled:cursor-not-allowed disabled:opacity-60",
         variantClasses[variant],
         className
       )}
       {...props}
     >
+      <PrototypeAsset
+        src={variantAssets[variant]}
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        fit="fill"
+      />
       {withTape ? <Tape className="-right-1 -top-3 h-6 w-16 rotate-[16deg]" /> : null}
-      {icon}
-      <span>{children}</span>
+      <span className="relative z-10 inline-flex max-w-full flex-wrap items-center justify-center gap-3">
+        {icon}
+        <span>{children}</span>
+      </span>
     </motion.button>
   );
 }

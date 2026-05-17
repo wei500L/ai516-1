@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { PrototypeAsset } from "@/components/prototype/prototype-asset";
+import { tags } from "@/lib/prototype-assets";
 
 type StickerTagProps = {
   children: React.ReactNode;
@@ -8,10 +10,17 @@ type StickerTagProps = {
 };
 
 const toneClasses = {
-  sage: "bg-sage/78 text-cream",
-  parchment: "bg-parchment text-coffee",
-  rose: "bg-[#e9bbb1] text-coffee",
-  blue: "bg-old-blue-gray/28 text-coffee"
+  sage: "text-cream",
+  parchment: "text-coffee",
+  rose: "text-coffee",
+  blue: "text-coffee"
+};
+
+const toneAssets = {
+  sage: tags.labelSage,
+  parchment: tags.labelBeige,
+  rose: tags.tagRed,
+  blue: tags.tagSage
 };
 
 export function StickerTag({
@@ -23,13 +32,16 @@ export function StickerTag({
   return (
     <span
       className={cn(
-        "torn-edge paper-grain inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium shadow-sticker",
+        "relative inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium drop-shadow-sticker",
         toneClasses[tone],
         className
       )}
     >
-      {icon}
-      {children}
+      <PrototypeAsset src={toneAssets[tone]} className="pointer-events-none absolute inset-0 h-full w-full" fit="fill" />
+      <span className="relative z-10 inline-flex items-center gap-2">
+        {icon}
+        {children}
+      </span>
     </span>
   );
 }

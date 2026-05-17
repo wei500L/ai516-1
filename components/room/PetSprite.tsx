@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Cat, Dog } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { PrototypeAsset } from "@/components/prototype/prototype-asset";
 import type { MiniRoomPet } from "@/lib/adapters/roomPublicDataAdapter";
+import { decor } from "@/lib/prototype-assets";
 import { cn } from "@/lib/utils";
 
 type PetSpriteProps = {
@@ -80,12 +82,12 @@ export function PetSprite({ pet, zIndex, onSelect }: PetSpriteProps) {
             src={pet.assetUrl}
             alt={pet.name}
             draggable={false}
-            className="pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain drop-shadow-[var(--room-sprite-shadow)] transition group-hover:-translate-y-1"
+            className="pointer-events-none absolute bottom-0 left-1/2 max-h-full max-w-full -translate-x-1/2 object-contain drop-shadow-[0_10px_9px_rgba(45,27,15,0.28)] transition group-hover:-translate-y-1"
           />
         ) : (
           <>
-            <span className="absolute inset-1 rounded-full bg-cream/78 shadow-[0_0_18px_rgba(255,215,123,0.74)]" />
-            <span className="torn-edge paper-grain relative flex h-12 w-12 items-center justify-center bg-parchment text-coffee shadow-sticker transition group-hover:-translate-y-1">
+            <PrototypeAsset src={decor.stampFlower} className="absolute inset-1" />
+            <span className="relative flex h-12 w-12 items-center justify-center text-coffee drop-shadow-sticker transition group-hover:-translate-y-1">
               <Icon className="h-7 w-7" strokeWidth={1.5} />
             </span>
           </>
